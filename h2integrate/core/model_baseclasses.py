@@ -18,8 +18,7 @@ class CostModelBaseClass(om.ExplicitComponent):
     """Baseclass to be used for all cost models. The built-in outputs
     are used by the finance model and must be outputted by all cost models.
 
-    It is suggested to use CostModelBaseConfig as the base class for
-    configuration classes that are used in subclasses that inherit this class.
+    Subclasses should use CostModelBaseConfig for their configuration class.
 
     Outputs:
         - CapEx (float): capital expenditure costs in $
@@ -171,6 +170,7 @@ class CacheBaseConfig(BaseConfig):
 
 class CacheBaseClass(om.ExplicitComponent):
     """Baseclass with methods to cache results and load data from cached results.
+
     Subclasses should have a corresponding config class that inherits
     `CacheBaseConfig`.
     """
