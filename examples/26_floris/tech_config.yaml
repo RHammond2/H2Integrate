@@ -4,9 +4,9 @@ description: "This plant runs a wind farm using FLORIS"
 technologies:
   wind:
     performance_model:
-      model: "floris_wind_plant_performance"
+      model: "FlorisWindPlantPerformanceModel"
     cost_model:
-      model: "atb_wind_cost"
+      model: "ATBWindPlantCostModel"
     model_inputs:
       performance_parameters:
         num_turbines: 100 #number of turbines in the farm

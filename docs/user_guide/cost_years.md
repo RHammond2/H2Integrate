@@ -11,9 +11,9 @@ For [cost models based on user-provided costs](#cost-models-with-user-input-cost
 ### Summary of cost models that are based around a cost year
 | Cost Model              | Cost Year  |
 | :---------------------- | :---------------: |
-| `basic_electrolyzer_cost`|  2016    |
+| `BasicElectrolyzerCostModel`|  2016    |
 | `pem_electrolyzer_cost`|  2021    |
-| `singlitico_electrolyzer_cost`|  2021    |
+| `SingliticoCostModel`|  2021    |
 | `h2_storage`  with `'mch'` storage type  |  2024    |
 | `h2_storage` for geologic storage or buried pipe | 2018 |
 | `simple_ammonia_cost`   |  2022    |
@@ -31,25 +31,25 @@ For [cost models based on user-provided costs](#cost-models-with-user-input-cost
 | Cost Model              |
 | :---------------------- |
 | `wind_plant_cost` |
-| `atb_utility_pv_cost` |
-| `atb_comm_res_pv_cost` |
-| `simple_ASU_cost` |
+| `ATBUtilityPVCostModel` |
+| `ATBResComPVCostModel` |
+| `SimpleASUCostModel` |
 | `hopp`            |
-| `run_of_river_hydro_cost` |
+| `RunOfRiverHydroCostModel` |
 | `smr_methanol_plant_cost` |
 | `stimulated_geoh2_cost` |
 | `natural_geoh2_cost`    |
-| `wombat`                |
-| `custom_electrolyzer_cost` |
+| `WOMBATElectrolyzerModel`                |
+| `CustomElectrolyzerCostModel` |
 
 ### Example tech_config input for user-input cost year
 ```yaml
 technologies:
   solar:
     performance_model:
-      model: "pysam_solar_plant_performance"
+      model: "PYSAMSolarPlantPerformanceModel"
     cost_model:
-      model: "atb_utility_pv_cost"
+      model: "ATBUtilityPVCostModel"
     model_inputs:
         performance_parameters:
             pv_capacity_kWdc: 100000

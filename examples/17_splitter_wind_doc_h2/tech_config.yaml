@@ -4,9 +4,9 @@ description: "This plant has offshore wind and wave energy connected to a power 
 technologies:
   wind:
     performance_model:
-      model: "floris_wind_plant_performance"
+      model: "FlorisWindPlantPerformanceModel"
     cost_model:
-      model: "atb_wind_cost"
+      model: "ATBWindPlantCostModel"
     model_inputs:
       performance_parameters:
         num_turbines: 8 #number of turbines in the farm
@@ -73,9 +73,9 @@ technologies:
 
   electrolyzer:
     performance_model:
-      model: "eco_pem_electrolyzer_performance"
+      model: "ECOElectrolyzerPerformanceModel"
     cost_model:
-      model: "singlitico_electrolyzer_cost"
+      model: "SingliticoCostModel"
     model_inputs:
       shared_parameters:
         location: "onshore"

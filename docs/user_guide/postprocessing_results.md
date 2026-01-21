@@ -29,7 +29,7 @@ plant
   hopp_to_electrolyzer_cable
     electricity_out                   |85694382.72934064|   kW         hopp_to_electrolyzer_cable.electricity_out
   electrolyzer
-    eco_pem_electrolyzer_performance
+    ECOElectrolyzerPerformanceModel
       hydrogen_out                    |1100221.2561732|     kg/h       electrolyzer.hydrogen_out
       time_until_replacement          [47705.10433122]      h          electrolyzer.time_until_replacement
       total_hydrogen_produced         [89334697.48304178]   kg/year    electrolyzer.total_hydrogen_produced

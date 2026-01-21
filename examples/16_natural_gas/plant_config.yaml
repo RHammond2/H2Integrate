@@ -8,7 +8,7 @@ site:
 
   resources:
     solar_resource:
-      resource_model: "goes_aggregated_solar_v4_api"
+      resource_model: "GOESAggregatedSolarAPI"
       resource_parameters:
         resource_year: 2013
         resource_dir: "../11_hybrid_energy_plant/tech_inputs/weather/solar"

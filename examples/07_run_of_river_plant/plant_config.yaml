@@ -6,8 +6,8 @@ site:
   longitude: -98.27
 
   resources:
-    river_resource:
-      resource_model: "river_resource"
+    RiverResource:
+      resource_model: "RiverResource"
       resource_parameters:
         filename: "river_data.csv"
 
@@ -24,7 +24,7 @@ technology_interconnections: [
 # array of arrays containing left-to-right resource interconnections;
 resource_to_tech_connections: [
   # connect the river resource to the run-of-river hydro technology
-  ['river_resource', 'river', 'discharge'],
+  ['RiverResource', 'river', 'discharge'],
 ]
 
 plant:

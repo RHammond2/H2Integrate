@@ -14,18 +14,18 @@ Currently, H2I recognizes four types of models:
 
 | Resource name     | Resource Type  |
 | :---------------- | :---------------: |
-| `river_resource`  | river resource |
-| `wind_toolkit_v2_api` | wind resource |
-| `openmeteo_wind_api` | wind resource |
-| `goes_aggregated_solar_v4_api` | solar resource |
-| `goes_conus_solar_v4_api` | solar resource |
-| `goes_fulldisc_solar_v4_api` | solar resource |
-| `goes_tmy_solar_v4_api` | solar resource |
-| `meteosat_solar_v4_api` | solar resource |
-| `meteosat_tmy_solar_v4_api` | solar resource |
-| `himawari7_solar_v3_api` | solar resource |
-| `himawari8_solar_v3_api` | solar resource |
-| `himawari_tmy_solar_v3_api` | solar resource |
+| `RiverResource`  | river resource |
+| `WTKNRELDeveloperAPIWindResource` | wind resource |
+| `OpenMeteoHistoricalWindResource` | wind resource |
+| `GOESAggregatedSolarAPI` | solar resource |
+| `GOESConusSolarAPI` | solar resource |
+| `GOESFullDiscSolarAPI` | solar resource |
+| `GOESTMYSolarAPI` | solar resource |
+| `MeteosatPrimeMeridianSolarAPI` | solar resource |
+| `MeteosatPrimeMeridianTMYSolarAPI` | solar resource |
+| `Himawari7SolarAPI` | solar resource |
+| `Himawari8SolarAPI` | solar resource |
+| `HimawariTMYSolarAPI` | solar resource |
 
 
 (converters)=
@@ -111,53 +111,53 @@ Below summarizes the available performance, cost, and financial models for each 
 ## Resource models
 - `river`:
     - resource models:
-        + `river_resource`
+        + `RiverResource`
 - `wind_resource`:
     - resource models:
-        + `wind_toolkit_v2_api`
-        + `openmeteo_wind_api`
+        + `WTKNRELDeveloperAPIWindResource`
+        + `OpenMeteoHistoricalWindResource`
 - `solar_resource`:
     - resource models:
-        + `goes_aggregated_solar_v4_api`
-        + `goes_conus_solar_v4_api`
-        + `goes_fulldisc_solar_v4_api`
-        + `goes_tmy_solar_v4_api`
-        + `meteosat_solar_v4_api`
-        + `meteosat_tmy_solar_v4_api`
-        + `himawari7_solar_v3_api`
-        + `himawari8_solar_v3_api`
-        + `himawari_tmy_solar_v3_api`
+        + `GOESAggregatedSolarAPI`
+        + `GOESConusSolarAPI`
+        + `GOESFullDiscSolarAPI`
+        + `GOESTMYSolarAPI`
+        + `MeteosatPrimeMeridianSolarAPI`
+        + `MeteosatPrimeMeridianTMYSolarAPI`
+        + `Himawari7SolarAPI`
+        + `Himawari8SolarAPI`
+        + `HimawariTMYSolarAPI`
 
 (converter-models)=
 ## Converter models
 - `wind`: wind turbine
     - performance models:
-        + `'pysam_wind_plant_performance'`
-        + `'floris_wind_plant_performance'`
+        + `'PYSAMWindPlantPerformanceModel'`
+        + `'FlorisWindPlantPerformanceModel'`
     - cost models:
-        + `'atb_wind_cost'`
+        + `'ATBWindPlantCostModel'`
 - `solar`: solar-PV panels
     - performance models:
-        + `'pysam_solar_plant_performance'`
+        + `'PYSAMSolarPlantPerformanceModel'`
     - cost models:
-        + `'atb_utility_pv_cost'`
-        + `'atb_comm_res_pv_cost'`
+        + `'ATBUtilityPVCostModel'`
+        + `'ATBResComPVCostModel'`
 - `river`: hydropower
     - performance models:
-        + `'run_of_river_hydro_performance'`
+        + `'RunOfRiverHydroPerformanceModel'`
     - cost models:
-        + `'run_of_river_hydro_cost'`
+        + `'RunOfRiverHydroCostModel'`
 - `hopp`: hybrid plant
     - combined performance and cost model:
         + `'hopp'`
 - `electrolyzer`: hydrogen electrolysis
     - combined performance and cost:
-        + `'wombat'`
+        + `'WOMBATElectrolyzerModel'`
     - performance models:
-        + `'eco_pem_electrolyzer_performance'`
+        + `'ECOElectrolyzerPerformanceModel'`
     - cost models:
-        + `'singlitico_electrolyzer_cost'`
-        + `'basic_electrolyzer_cost'`
+        + `'SingliticoCostModel'`
+        + `'BasicElectrolyzerCostModel'`
 - `geoh2_well_subsurface`: geologic hydrogen well subsurface
     - performance models:
         + `'simple_natural_geoh2_performance'`
@@ -202,9 +202,9 @@ Below summarizes the available performance, cost, and financial models for each 
         + `'methanol_plant_financial'`
 - `air_separator`: nitrogen separation from air
     - performance models:
-        + `'simple_ASU_performance'`
+        + `'SimpleASUPerformanceModel'`
     - cost models:
-        + `'simple_ASU_cost'`
+        + `'SimpleASUCostModel'`
 - `desal`: water desalination
     - performance models:
         + `'reverse_osmosis_desalination_performance'`

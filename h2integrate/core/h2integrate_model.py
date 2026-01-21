@@ -383,7 +383,12 @@ class H2IntegrateModel:
         self.cost_models = []
         self.finance_models = []
 
-        combined_performance_and_cost_models = ["hopp", "h2_storage", "wombat", "iron"]
+        combined_performance_and_cost_models = [
+            "hopp",
+            "h2_storage",
+            "WOMBATElectrolyzerModel",
+            "iron",
+        ]
 
         if any(tech == "site" for tech in self.technology_config["technologies"]):
             msg = (

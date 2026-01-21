@@ -4,9 +4,9 @@ description: "This hybrid plant produces steel"
 technologies:
   wind:
     performance_model:
-      model: "floris_wind_plant_performance"
+      model: "FlorisWindPlantPerformanceModel"
     cost_model:
-      model: "atb_wind_cost"
+      model: "ATBWindPlantCostModel"
     model_inputs:
       performance_parameters:
         num_turbines: 216 #number of turbines in the farm
@@ -34,9 +34,9 @@ technologies:
 
   solar:
     performance_model:
-      model: "pysam_solar_plant_performance"
+      model: "PYSAMSolarPlantPerformanceModel"
     cost_model:
-      model: "atb_comm_res_pv_cost"
+      model: "ATBResComPVCostModel"
     model_inputs:
       shared_parameters:
         pv_capacity_kWdc: 1500000 #1500 MWdc
@@ -108,9 +108,9 @@ technologies:
 
   electrolyzer:
     performance_model:
-      model: "eco_pem_electrolyzer_performance"
+      model: "ECOElectrolyzerPerformanceModel"
     cost_model:
-      model: "singlitico_electrolyzer_cost"
+      model: "SingliticoCostModel"
     model_inputs:
       shared_parameters:
         location: "onshore"

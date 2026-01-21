@@ -7,7 +7,7 @@ site:
 
   resources:
     wind_resource:
-      resource_model: "openmeteo_wind_api"
+      resource_model: "OpenMeteoHistoricalWindResource"
       resource_parameters:
         resource_year: 2023
 

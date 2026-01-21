@@ -16,12 +16,10 @@ def plot_methanol(model):
     T = plt.title("Electrolyzer")
     T.set_position([-0.2, 1.1])
     elyzer_elec_in = (
-        model.plant.electrolyzer.eco_pem_electrolyzer_performance.get_val("electricity_in") / 1000
+        model.plant.electrolyzer.ECOElectrolyzerPerformanceModel.get_val("electricity_in") / 1000
     )
     elyzer_h2_out = (
-        model.plant.electrolyzer.eco_pem_electrolyzer_performance.get_val("hydrogen_out")
-        / 1000
-        * 24
+        model.plant.electrolyzer.ECOElectrolyzerPerformanceModel.get_val("hydrogen_out") / 1000 * 24
     )
     plt.plot(times, elyzer_elec_in, label="Electricity Available [MW]", color=[0.5, 0.5, 1])
     plt.plot(
