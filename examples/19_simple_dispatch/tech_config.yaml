@@ -33,7 +33,7 @@ technologies:
     performance_model:
       model: "simple_generic_storage"
     cost_model:
-      model: "atb_battery_cost"
+      model: "ATBBatteryCostModel"
     control_strategy:
       model: "demand_open_loop_storage_controller"
     model_inputs:

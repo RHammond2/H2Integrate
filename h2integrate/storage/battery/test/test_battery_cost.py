@@ -2,7 +2,7 @@ import numpy as np
 import openmdao.api as om
 from pytest import fixture
 
-from h2integrate.storage.battery.atb_battery_cost import ATBBatteryCostModel
+from h2integrate.storage.battery.ATBBatteryCostModel import ATBBatteryCostModel
 from h2integrate.control.control_strategies.storage.demand_openloop_controller import (
     DemandOpenLoopStorageController,
 )
@@ -30,7 +30,7 @@ def electricity_profile_kW():
 def battery_tech_config_kW():
     battery_inputs = {
         "performance_model": {"model": "simple_generic_storage"},
-        "cost_model": {"model": "atb_battery_cost"},
+        "cost_model": {"model": "ATBBatteryCostModel"},
         "control_strategy": {"model": "demand_open_loop_storage_controller"},
         "model_inputs": {
             "shared_parameters": {
@@ -63,7 +63,7 @@ def battery_tech_config_kW():
 def battery_tech_config_MW():
     battery_inputs = {
         "performance_model": {"model": "simple_generic_storage"},
-        "cost_model": {"model": "atb_battery_cost"},
+        "cost_model": {"model": "ATBBatteryCostModel"},
         "control_strategy": {"model": "demand_open_loop_storage_controller"},
         "model_inputs": {
             "shared_parameters": {

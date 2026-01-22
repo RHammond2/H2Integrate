@@ -78,7 +78,7 @@ technologies:
     performance_model:
       model: "PySAMBatteryPerformanceModel"
     cost_model:
-      model: "atb_battery_cost"
+      model: "ATBBatteryCostModel"
     model_inputs:
       shared_parameters:
         commodity_name: "electricity"

@@ -275,7 +275,7 @@ Below summarizes the available performance, cost, and financial models for each 
     - performance models:
         + `'PySAMBatteryPerformanceModel'`
     - cost models:
-        + `'atb_battery_cost'`
+        + `'ATBBatteryCostModel'`
 
 (basic-operations)=
 ## Basic Operations

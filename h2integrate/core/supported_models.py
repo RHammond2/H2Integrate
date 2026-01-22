@@ -238,7 +238,7 @@ supported_models = {
     "SaltCavernStorageCostModel": SaltCavernStorageCostModel,
     "MCHTOLStorageCostModel": MCHTOLStorageCostModel,
     "PipeStorageCostModel": PipeStorageCostModel,
-    "atb_battery_cost": ATBBatteryCostModel,
+    "ATBBatteryCostModel": ATBBatteryCostModel,
     "generic_storage_cost": GenericStorageCostModel,
     "simple_generic_storage": SimpleGenericStorage,
     # Control
