@@ -184,8 +184,8 @@ supported_models = {
     "IronComponent": IronComponent,
     "IronMinePerformanceComponent": IronMinePerformanceComponent,
     "IronMineCostComponent": IronMineCostComponent,
-    "iron_plant_performance": IronPlantPerformanceComponent,
-    "iron_plant_cost": IronPlantCostComponent,
+    "IronPlantPerformanceComponent": IronPlantPerformanceComponent,
+    "IronPlantCostComponent": IronPlantCostComponent,
     "iron_mine_performance_martin": MartinIronMinePerformanceComponent,  # standalone model
     "iron_mine_cost_martin": MartinIronMineCostComponent,  # standalone model
     "ng_dri_performance_rosner": NaturalGasIronReductionPlantPerformanceComponent,
