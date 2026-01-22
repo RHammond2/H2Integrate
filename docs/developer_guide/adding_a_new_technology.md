@@ -228,7 +228,7 @@ If you're adding a technology where this makes sense, you can follow the same st
 For now, modify a single  the `create_technology_models.py` file to include your new technology as such:
 
 ```python
-combined_performance_and_cost_model_technologies = ['hopp', 'h2_storage', '<your_tech_here>']
+combined_performance_and_cost_model_technologies = ['HOPPComponent', 'h2_storage', '<your_tech_here>']
 
 # Create a technology group for each technology
 for tech_name, individual_tech_config in self.technology_config['technologies'].items():

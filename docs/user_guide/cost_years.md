@@ -34,7 +34,7 @@ For [cost models based on user-provided costs](#cost-models-with-user-input-cost
 | `ATBUtilityPVCostModel` |
 | `ATBResComPVCostModel` |
 | `SimpleASUCostModel` |
-| `hopp`            |
+| `HOPPComponent`            |
 | `RunOfRiverHydroCostModel` |
 | `smr_methanol_plant_cost` |
 | `stimulated_geoh2_cost` |

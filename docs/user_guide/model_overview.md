@@ -41,7 +41,7 @@ The inputs, outputs, and corresponding technology that are currently available i
 | `wind`           |  electricity  | wind resource |
 | `solar`          |  electricity  | solar resource |
 | `river`          |  electricity  | river resource |
-| `hopp`           |  electricity  | N/A |
+| `HOPPComponent`           |  electricity  | N/A |
 | `electrolyzer`   |  hydrogen     | electricity |
 | `geoh2`          |  hydrogen     | rock type |
 | `steel`          |  steel        | hydrogen |
@@ -100,12 +100,19 @@ Connection: `[source_tech, dest_tech, transport_commodity, transport_technology]
 # Technology Models Overview
 
 Below summarizes the available performance, cost, and financial models for each model type. The list of supported models is also available in [supported_models.py](../../h2integrate/core/supported_models.py)
-- [Resource](#resource-models)
-- [Converters](#converter-models)
-- [Transport](#transport-models)
-- [Storage](#storage-models)
-- [Basic Operations](#basic-operations)
-- [Control](#control-models)
+- [Model Overview](#model-overview)
+  - [Resource](#resource)
+  - [Converters](#converters)
+  - [Transport](#transport)
+  - [Storage](#storage)
+  - [Control](#control)
+- [Technology Models Overview](#technology-models-overview)
+  - [Resource models](#resource-models)
+  - [Converter models](#converter-models)
+  - [Transport Models](#transport-models)
+  - [Storage Models](#storage-models)
+  - [Basic Operations](#basic-operations)
+  - [Control Models](#control-models)
 
 (resource-models)=
 ## Resource models
@@ -149,7 +156,7 @@ Below summarizes the available performance, cost, and financial models for each 
         + `'RunOfRiverHydroCostModel'`
 - `hopp`: hybrid plant
     - combined performance and cost model:
-        + `'hopp'`
+        + `'HOPPComponent'`
 - `electrolyzer`: hydrogen electrolysis
     - combined performance and cost:
         + `'WOMBATElectrolyzerModel'`

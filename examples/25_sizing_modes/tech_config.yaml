@@ -27,9 +27,9 @@ technologies:
           replacement_cost_percent: 0.15 # percent of capex - H2A default case
   hopp:
     performance_model:
-      model: "hopp"
+      model: "HOPPComponent"
     cost_model:
-      model: "hopp"
+      model: "HOPPComponent"
     model_inputs:
       shared_parameters:
         cost_year: 2019

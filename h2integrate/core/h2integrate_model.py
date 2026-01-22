@@ -384,7 +384,7 @@ class H2IntegrateModel:
         self.finance_models = []
 
         combined_performance_and_cost_models = [
-            "hopp",
+            "HOPPComponent",
             "h2_storage",
             "WOMBATElectrolyzerModel",
             "iron",

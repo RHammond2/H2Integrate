@@ -180,7 +180,7 @@ supported_models = {
     "WOMBATElectrolyzerModel": WOMBATElectrolyzerModel,
     "SimpleASUCostModel": SimpleASUCostModel,
     "SimpleASUPerformanceModel": SimpleASUPerformanceModel,
-    "hopp": HOPPComponent,
+    "HOPPComponent": HOPPComponent,
     "iron": IronComponent,
     "iron_mine_performance": IronMinePerformanceComponent,
     "iron_mine_cost": IronMineCostComponent,
@@ -284,7 +284,7 @@ def is_electricity_producer(tech_name: str) -> bool:
         "solar",
         "pv",
         "river",
-        "hopp",
+        "HOPPComponent",
         "natural_gas_plant",
         "grid_buy",
     ]

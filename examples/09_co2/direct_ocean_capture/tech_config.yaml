@@ -4,9 +4,9 @@ description: "This plant has offshore wind and wave energy connected to a direct
 technologies:
   hopp:
     performance_model:
-      model: "hopp"
+      model: "HOPPComponent"
     cost_model:
-      model: "hopp"
+      model: "HOPPComponent"
     dispatch_rule_set:
       model: "pyomo_dispatch_generic_converter"
     model_inputs:
