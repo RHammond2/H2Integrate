@@ -17,7 +17,7 @@ For [cost models based on user-provided costs](#cost-models-with-user-input-cost
 | `h2_storage`  with `'mch'` storage type  |  2024    |
 | `h2_storage` for geologic storage or buried pipe | 2018 |
 | `simple_ammonia_cost`   |  2022    |
-| `direct_ocean_capture_cost` | 2023 |
+| `DOCCostModel` | 2023 |
 | `ocean_alkalinity_enhancement_cost` | 2024 |
 | `ocean_alkalinity_enhancement_cost_financial` | 2024 |
 | `SteelCostAndFinancialModel`            |  2022    |

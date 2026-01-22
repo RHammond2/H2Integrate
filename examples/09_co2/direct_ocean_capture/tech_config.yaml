@@ -98,9 +98,9 @@ technologies:
         commodity_storage_units: "kW"
   doc:
     performance_model:
-      model: "direct_ocean_capture_performance"
+      model: "DOCPerformanceModel"
     cost_model:
-      model: "direct_ocean_capture_cost"
+      model: "DOCCostModel"
     model_inputs:
       shared_parameters:
         power_single_ed_w: 24000000. # W

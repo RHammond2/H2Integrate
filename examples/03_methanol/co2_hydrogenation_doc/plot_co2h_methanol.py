@@ -44,8 +44,8 @@ def plot_methanol(model):
     plt.subplot(3, 2, 2)
     T = plt.title("Direct\nOcean\nCapture")
     T.set_position([-0.2, 1.1])
-    doc_elec_in = model.plant.doc.direct_ocean_capture_performance.get_val("electricity_in") / 1e6
-    doc_co2_out = model.plant.doc.direct_ocean_capture_performance.get_val("co2_out") / 1000
+    doc_elec_in = model.plant.doc.DOCPerformanceModel.get_val("electricity_in") / 1e6
+    doc_co2_out = model.plant.doc.DOCPerformanceModel.get_val("co2_out") / 1000
     plt.plot(times, doc_elec_in, label="Electricity Available [MW]", color=[0.5, 0.5, 1])
     plt.plot(
         [times[0], times[-1]],

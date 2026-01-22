@@ -190,9 +190,9 @@ Below summarizes the available performance, cost, and financial models for each 
         + `'AmmoniaSynLoopCostModel'`
 - `doc`: direct ocean capture
     - performance models:
-        + `'direct_ocean_capture_performance'`
+        + `'DOCPerformanceModel'`
     - cost models:
-        + `'direct_ocean_capture_cost'`
+        + `'DOCCostModel'`
 - `oae`: ocean alkalinity enhancement
     - performance models:
         + `'ocean_alkalinity_enhancement_performance'`
