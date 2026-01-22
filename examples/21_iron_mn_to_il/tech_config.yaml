@@ -38,9 +38,9 @@ technologies:
 
   iron_mine:
     performance_model:
-      model: "iron_mine_performance_martin"
+      model: "MartinIronMinePerformanceComponent"
     cost_model:
-      model: "iron_mine_cost_martin"
+      model: "MartinIronMineCostComponent"
     model_inputs:
       shared_parameters:
         mine: "Northshore"

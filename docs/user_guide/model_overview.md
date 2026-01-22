@@ -229,9 +229,9 @@ Below summarizes the available performance, cost, and financial models for each 
         + `'grid_cost'`
 - `iron_ore`: iron ore mining and refining
     - performance models:
-        + `'iron_mine_performance_martin'`
+        + `'MartinIronMinePerformanceComponent'`
     - cost models:
-        + `'iron_mine_cost_martin'`
+        + `'MartinIronMineCostComponent'`
 - `iron_dri`: iron ore direct reduction
     - performance models:
         + `'ng_dri_performance_rosner'`
