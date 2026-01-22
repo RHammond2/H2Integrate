@@ -195,9 +195,9 @@ technologies:
 
   steel_plant:
     performance_model:
-      model: "ng_eaf_performance_rosner"
+      model: "NaturalGasEAFPlantPerformanceComponent"
     cost_model:
-      model: "ng_eaf_cost_rosner"
+      model: "NaturalGasEAFPlantCostComponent"
     model_inputs:
       shared_parameters:
         steel_production_rate_tonnes_per_hr: 135.8187214611872 #equivalent to 1189772 t/yr

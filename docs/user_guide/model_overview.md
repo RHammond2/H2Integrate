@@ -174,13 +174,13 @@ Below summarizes the available performance, cost, and financial models for each 
 - `steel`: steel production
     - performance models:
         + `'steel_performance'`
-        + `'ng_eaf_performance_rosner'`
-        + `'h2_eaf_performance_rosner'`
+        + `'NaturalGasEAFPlantPerformanceComponent'`
+        + `'HydrogenEAFPlantPerformanceComponent'`
     - combined cost and financial models:
         + `'steel_cost'`
     - cost models:
-        + `'ng_eaf_cost_rosner'`
-        + `'h2_eaf_cost_rosner'`
+        + `'NaturalGasEAFPlantCostComponent'`
+        + `'HydrogenEAFPlantCostComponent'`
 - `ammonia`: ammonia synthesis
     - performance models:
         + `'simple_ammonia_performance'`

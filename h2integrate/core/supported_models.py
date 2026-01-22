@@ -192,10 +192,10 @@ supported_models = {
     "NaturalGasIronReductionPlantCostComponent": NaturalGasIronReductionPlantCostComponent,  # standalone model  # noqa: E501
     "HydrogenIronReductionPlantPerformanceComponent": HydrogenIronReductionPlantPerformanceComponent,  # noqa: E501
     "HydrogenIronReductionPlantCostComponent": HydrogenIronReductionPlantCostComponent,  # standalone model  # noqa: E501
-    "ng_eaf_performance_rosner": NaturalGasEAFPlantPerformanceComponent,
-    "ng_eaf_cost_rosner": NaturalGasEAFPlantCostComponent,  # standalone model
-    "h2_eaf_performance_rosner": HydrogenEAFPlantPerformanceComponent,
-    "h2_eaf_cost_rosner": HydrogenEAFPlantCostComponent,  # standalone model
+    "NaturalGasEAFPlantPerformanceComponent": NaturalGasEAFPlantPerformanceComponent,
+    "NaturalGasEAFPlantCostComponent": NaturalGasEAFPlantCostComponent,  # standalone model
+    "HydrogenEAFPlantPerformanceComponent": HydrogenEAFPlantPerformanceComponent,
+    "HydrogenEAFPlantCostComponent": HydrogenEAFPlantCostComponent,  # standalone model
     "reverse_osmosis_desalination_performance": ReverseOsmosisPerformanceModel,
     "reverse_osmosis_desalination_cost": ReverseOsmosisCostModel,
     "simple_ammonia_performance": SimpleAmmoniaPerformanceModel,
