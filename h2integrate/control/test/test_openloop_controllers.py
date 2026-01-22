@@ -259,7 +259,7 @@ def test_storage_demand_controller_round_trip_efficiency(subtests):
 
 def test_generic_storage_demand_controller(subtests):
     # Test is the same as the demand controller test test_demand_controller for the "h2_storage"
-    # performance model but with the "simple_generic_storage" performance model
+    # performance model but with the "SimpleGenericStorage" performance model
 
     # Get the directory of the current script
     current_dir = Path(__file__).parent
@@ -273,7 +273,7 @@ def test_generic_storage_demand_controller(subtests):
 
     tech_config["technologies"]["h2_storage"] = {
         "performance_model": {
-            "model": "simple_generic_storage",
+            "model": "SimpleGenericStorage",
         },
         "control_strategy": {
             "model": "demand_open_loop_storage_controller",
@@ -345,7 +345,7 @@ def test_generic_storage_demand_controller(subtests):
 
 def test_demand_converter_controller(subtests):
     # Test is the same as the demand controller test test_demand_controller for the "h2_storage"
-    # performance model but with the "simple_generic_storage" performance model
+    # performance model but with the "SimpleGenericStorage" performance model
 
     # Get the directory of the current script
     current_dir = Path(__file__).parent

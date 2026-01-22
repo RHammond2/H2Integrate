@@ -267,10 +267,10 @@ Below summarizes the available performance, cost, and financial models for each 
         + `'PipeStorageCostModel'`
 - `generic_storage`: any resource storage
     - performance models:
-        + `'simple_generic_storage'`
+        + `'SimpleGenericStorage'`
         + `'StorageAutoSizingModel'`
     - cost models:
-        + `'generic_storage_cost'`
+        + `'GenericStorageCostModel'`
 - `battery`: battery storage
     - performance models:
         + `'PySAMBatteryPerformanceModel'`

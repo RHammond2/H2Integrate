@@ -29,7 +29,7 @@ def electricity_profile_kW():
 @fixture
 def battery_tech_config_kW():
     battery_inputs = {
-        "performance_model": {"model": "simple_generic_storage"},
+        "performance_model": {"model": "SimpleGenericStorage"},
         "cost_model": {"model": "ATBBatteryCostModel"},
         "control_strategy": {"model": "demand_open_loop_storage_controller"},
         "model_inputs": {
@@ -62,7 +62,7 @@ def battery_tech_config_kW():
 @fixture
 def battery_tech_config_MW():
     battery_inputs = {
-        "performance_model": {"model": "simple_generic_storage"},
+        "performance_model": {"model": "SimpleGenericStorage"},
         "cost_model": {"model": "ATBBatteryCostModel"},
         "control_strategy": {"model": "demand_open_loop_storage_controller"},
         "model_inputs": {

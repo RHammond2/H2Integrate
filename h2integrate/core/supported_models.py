@@ -239,8 +239,8 @@ supported_models = {
     "MCHTOLStorageCostModel": MCHTOLStorageCostModel,
     "PipeStorageCostModel": PipeStorageCostModel,
     "ATBBatteryCostModel": ATBBatteryCostModel,
-    "generic_storage_cost": GenericStorageCostModel,
-    "simple_generic_storage": SimpleGenericStorage,
+    "GenericStorageCostModel": GenericStorageCostModel,
+    "SimpleGenericStorage": SimpleGenericStorage,
     # Control
     "pass_through_controller": PassThroughOpenLoopController,
     "demand_open_loop_storage_controller": DemandOpenLoopStorageController,
