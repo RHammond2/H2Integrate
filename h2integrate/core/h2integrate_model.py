@@ -387,7 +387,7 @@ class H2IntegrateModel:
             "HOPPComponent",
             "h2_storage",
             "WOMBATElectrolyzerModel",
-            "iron",
+            "IronComponent",
         ]
 
         if any(tech == "site" for tech in self.technology_config["technologies"]):
