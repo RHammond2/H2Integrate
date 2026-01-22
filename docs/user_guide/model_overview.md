@@ -273,7 +273,7 @@ Below summarizes the available performance, cost, and financial models for each 
         + `'generic_storage_cost'`
 - `battery`: battery storage
     - performance models:
-        + `'pysam_battery'`
+        + `'PySAMBatteryPerformanceModel'`
     - cost models:
         + `'atb_battery_cost'`
 

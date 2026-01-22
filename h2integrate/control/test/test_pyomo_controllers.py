@@ -36,7 +36,7 @@ tech_config = {
         "battery": {
             "dispatch_rule_set": {"model": "pyomo_dispatch_generic_storage"},
             "control_strategy": {"model": "heuristic_load_following_controller"},
-            "performance_model": {"model": "pysam_battery"},
+            "performance_model": {"model": "PySAMBatteryPerformanceModel"},
             "model_inputs": {
                 "shared_parameters": {
                     "max_charge_rate": 50000,

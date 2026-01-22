@@ -67,7 +67,7 @@ technologies:
     control_strategy:
       model: "heuristic_load_following_controller"
     performance_model:
-      model: "pysam_battery"
+      model: "PySAMBatteryPerformanceModel"
     cost_model:
       model: "atb_battery_cost"
     model_inputs:
