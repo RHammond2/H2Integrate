@@ -184,10 +184,10 @@ Below summarizes the available performance, cost, and financial models for each 
 - `ammonia`: ammonia synthesis
     - performance models:
         + `'simple_ammonia_performance'`
-        + `'synloop_ammonia_performance'`
+        + `'AmmoniaSynLoopPerformanceModel'`
     - cost models:
         + `'simple_ammonia_cost'`
-        + `'synloop_ammonia_cost'`
+        + `'AmmoniaSynLoopCostModel'`
 - `doc`: direct ocean capture
     - performance models:
         + `'direct_ocean_capture_performance'`
