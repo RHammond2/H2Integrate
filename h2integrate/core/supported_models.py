@@ -230,7 +230,7 @@ supported_models = {
     "iron_transport_performance": IronTransportPerformanceComponent,
     "iron_transport_cost": IronTransportCostComponent,
     # Simple Summers
-    "summer": GenericSummerPerformanceModel,
+    "GenericSummerPerformanceModel": GenericSummerPerformanceModel,
     # Storage
     "pysam_battery": PySAMBatteryPerformanceModel,
     "storage_auto_sizing": StorageAutoSizingModel,
