@@ -34,7 +34,7 @@ technologies:
 
   electricity_splitter:
     performance_model:
-      model: "splitter_performance"
+      model: "GenericSplitterPerformanceModel"
     model_inputs:
       performance_parameters:
         split_mode: "fraction"

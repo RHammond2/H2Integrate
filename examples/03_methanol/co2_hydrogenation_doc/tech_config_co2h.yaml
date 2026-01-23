@@ -45,7 +45,7 @@ technologies:
         cost_year: 2019
   electricity_splitter:
     performance_model:
-      model: "splitter_performance"
+      model: "GenericSplitterPerformanceModel"
     model_inputs:
       performance_parameters:
         commodity: "electricity"

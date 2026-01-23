@@ -225,9 +225,9 @@ supported_models = {
     # Transport
     "cable": CablePerformanceModel,
     "pipe": PipePerformanceModel,
-    "combiner_performance": GenericCombinerPerformanceModel,
-    "splitter_performance": GenericSplitterPerformanceModel,
-    "iron_transport_performance": IronTransportPerformanceComponent,
+    "GenericCombinerPerformanceModel": GenericCombinerPerformanceModel,
+    "GenericSplitterPerformanceModel": GenericSplitterPerformanceModel,
+    "IronTransportPerformanceComponent": IronTransportPerformanceComponent,
     "iron_transport_cost": IronTransportCostComponent,
     # Simple Summers
     "GenericSummerPerformanceModel": GenericSummerPerformanceModel,

@@ -49,7 +49,7 @@ technologies:
 
   iron_transport:
     performance_model:
-      model: "iron_transport_performance"
+      model: "IronTransportPerformanceComponent"
     cost_model:
       model: "iron_transport_cost"
     model_inputs:

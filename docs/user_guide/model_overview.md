@@ -250,10 +250,10 @@ Below summarizes the available performance, cost, and financial models for each 
         + `'pipe'`: currently compatible with the commodities "hydrogen", "co2", "methanol", "ammonia", "nitrogen", "natural_gas", "pig_iron", "reformer_catalyst", "water", "carbon", "iron_ore", and "lime"
 - `combiner`:
     - performance models:
-        + `'combiner_performance'`: can be used for any commodity
+        + `'GenericCombinerPerformanceModel'`: can be used for any commodity
 - `splitter`:
     - performance models:
-        + `'splitter_performance'`: can be used for any commodity
+        + `'GenericSplitterPerformanceModel'`: can be used for any commodity
 
 (storage-models)=
 ## Storage Models

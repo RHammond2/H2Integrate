@@ -111,7 +111,7 @@ technologies:
 
   combiner:
     performance_model:
-      model: combiner_performance
+      model: GenericCombinerPerformanceModel
     model_inputs:
       performance_parameters:
         commodity: electricity

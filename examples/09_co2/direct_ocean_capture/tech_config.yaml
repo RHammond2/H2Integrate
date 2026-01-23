@@ -51,7 +51,7 @@ technologies:
 
   combiner:
     performance_model:
-      model: "combiner_performance"
+      model: "GenericCombinerPerformanceModel"
     dispatch_rule_set:
       model: "PyomoDispatchGenericConverter"
     model_inputs:

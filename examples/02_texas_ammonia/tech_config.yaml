@@ -58,7 +58,7 @@ technologies:
         cost_year: 2019
   combiner:
     performance_model:
-      model: "combiner_performance"
+      model: "GenericCombinerPerformanceModel"
     dispatch_rule_set:
       model: "PyomoDispatchGenericConverter"
     model_inputs:
