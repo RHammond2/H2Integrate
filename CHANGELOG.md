@@ -9,6 +9,9 @@
 - Added postprocessing function to save timeseries
 - Minor reorg for profast tools
 - Removed hydrogen tank cost and performance models that were unused
+- Updates all models in `supported_models` to map between a string version of the class name and
+  the class itself. As such, all examples and documentation have been updated to properly instruct
+  users to the change in model configuration naming conventions.
 
 ## 0.5.1 [December 18, 2025]
 
