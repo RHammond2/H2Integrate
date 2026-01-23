@@ -251,8 +251,8 @@ supported_models = {
     "PyomoDispatchGenericConverter": PyomoDispatchGenericConverter,
     "PyomoRuleStorageBaseclass": PyomoRuleStorageBaseclass,
     # Feedstock
-    "feedstock_performance": FeedstockPerformanceModel,
-    "feedstock_cost": FeedstockCostModel,
+    "FeedstockPerformanceModel": FeedstockPerformanceModel,
+    "FeedstockCostModel": FeedstockCostModel,
     # Grid
     "GridPerformanceModel": GridPerformanceModel,
     "GridCostModel": GridCostModel,

@@ -64,9 +64,9 @@ technologies:
 
   ng_feedstock:
     performance_model:
-      model: feedstock_performance
+      model: FeedstockPerformanceModel
     cost_model:
-      model: feedstock_cost
+      model: FeedstockCostModel
     model_inputs:
       shared_parameters:
         feedstock_type: natural_gas

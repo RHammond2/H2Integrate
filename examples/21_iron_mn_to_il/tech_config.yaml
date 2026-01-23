@@ -4,9 +4,9 @@ description: "This hybrid plant produces iron"
 technologies:
   grid_feedstock: #electricity feedstock for iron ore
     performance_model:
-      model: "feedstock_performance"
+      model: "FeedstockPerformanceModel"
     cost_model:
-      model: "feedstock_cost"
+      model: "FeedstockCostModel"
     model_inputs:
       shared_parameters:
         feedstock_type: "electricity"
@@ -21,9 +21,9 @@ technologies:
 
   mine_feedstock: #iron ore feedstock
     performance_model:
-      model: "feedstock_performance"
+      model: "FeedstockPerformanceModel"
     cost_model:
-      model: "feedstock_cost"
+      model: "FeedstockCostModel"
     model_inputs:
       shared_parameters:
         feedstock_type: "crude_ore"
@@ -62,9 +62,9 @@ technologies:
 
   natural_gas_feedstock:
     performance_model:
-      model: "feedstock_performance"
+      model: "FeedstockPerformanceModel"
     cost_model:
-      model: "feedstock_cost"
+      model: "FeedstockCostModel"
     model_inputs:
       shared_parameters:
         feedstock_type: "natural_gas"
@@ -79,9 +79,9 @@ technologies:
 
   water_feedstock: #for iron reduction
     performance_model:
-      model: "feedstock_performance"
+      model: "FeedstockPerformanceModel"
     cost_model:
-      model: "feedstock_cost"
+      model: "FeedstockCostModel"
     model_inputs:
       shared_parameters:
         feedstock_type: "water"
@@ -96,9 +96,9 @@ technologies:
 
   catalyst_feedstock: #for NG iron reduction
     performance_model:
-      model: "feedstock_performance"
+      model: "FeedstockPerformanceModel"
     cost_model:
-      model: "feedstock_cost"
+      model: "FeedstockCostModel"
     model_inputs:
       shared_parameters:
         feedstock_type: "reformer_catalyst"
@@ -113,9 +113,9 @@ technologies:
 
   dri_grid_feedstock: #electricity feedstock for iron dri
     performance_model:
-      model: "feedstock_performance"
+      model: "FeedstockPerformanceModel"
     cost_model:
-      model: "feedstock_cost"
+      model: "FeedstockCostModel"
     model_inputs:
       shared_parameters:
         feedstock_type: "electricity"
@@ -144,9 +144,9 @@ technologies:
 
   eaf_grid_feedstock: #electricity feedstock for EAF
     performance_model:
-      model: "feedstock_performance"
+      model: "FeedstockPerformanceModel"
     cost_model:
-      model: "feedstock_cost"
+      model: "FeedstockCostModel"
     model_inputs:
       shared_parameters:
         feedstock_type: "electricity"
@@ -161,9 +161,9 @@ technologies:
 
   eaf_water_feedstock: #for EAF
     performance_model:
-      model: "feedstock_performance"
+      model: "FeedstockPerformanceModel"
     cost_model:
-      model: "feedstock_cost"
+      model: "FeedstockCostModel"
     model_inputs:
       shared_parameters:
         feedstock_type: "water"
@@ -178,9 +178,9 @@ technologies:
 
   eaf_natural_gas_feedstock:
     performance_model:
-      model: "feedstock_performance"
+      model: "FeedstockPerformanceModel"
     cost_model:
-      model: "feedstock_cost"
+      model: "FeedstockCostModel"
     model_inputs:
       shared_parameters:
         feedstock_type: "natural_gas"
