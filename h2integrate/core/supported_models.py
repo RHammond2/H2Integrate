@@ -254,8 +254,8 @@ supported_models = {
     "feedstock_performance": FeedstockPerformanceModel,
     "feedstock_cost": FeedstockCostModel,
     # Grid
-    "grid_performance": GridPerformanceModel,
-    "grid_cost": GridCostModel,
+    "GridPerformanceModel": GridPerformanceModel,
+    "GridCostModel": GridCostModel,
     # Finance
     "ProFastComp": ProFastLCO,
     "ProFastNPV": ProFastNPV,

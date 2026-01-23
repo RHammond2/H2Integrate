@@ -224,9 +224,9 @@ Below summarizes the available performance, cost, and financial models for each 
         + `'NaturalGasCostModel'`
 - `grid`: electricity grid connection
     - performance models:
-        + `'grid_performance'`
+        + `'GridPerformanceModel'`
     - cost models:
-        + `'grid_cost'`
+        + `'GridCostModel'`
 - `iron_ore`: iron ore mining and refining
     - performance models:
         + `'MartinIronMinePerformanceComponent'`
