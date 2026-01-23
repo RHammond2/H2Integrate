@@ -33,7 +33,7 @@ technologies:
     performance_model:
       model: "IronTransportPerformanceComponent"
     cost_model:
-      model: "iron_transport_cost"
+      model: "IronTransportCostComponent"
     model_inputs:
       performance_parameters:
         find_closest_ship_site: False

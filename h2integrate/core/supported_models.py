@@ -228,7 +228,7 @@ supported_models = {
     "GenericCombinerPerformanceModel": GenericCombinerPerformanceModel,
     "GenericSplitterPerformanceModel": GenericSplitterPerformanceModel,
     "IronTransportPerformanceComponent": IronTransportPerformanceComponent,
-    "iron_transport_cost": IronTransportCostComponent,
+    "IronTransportCostComponent": IronTransportCostComponent,
     # Simple Summers
     "GenericSummerPerformanceModel": GenericSummerPerformanceModel,
     # Storage
