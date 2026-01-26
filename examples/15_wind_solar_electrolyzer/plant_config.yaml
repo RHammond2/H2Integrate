@@ -31,8 +31,8 @@ technology_interconnections: [
 
 resource_to_tech_connections: [
   # connect the wind resource to the wind technology
-  ['wind_resource', 'wind', 'wind_resource_data'],
-  ['solar_resource', 'solar', 'solar_resource_data'],
+  ['wind_site.wind_resource', 'wind', 'wind_resource_data'],
+  ['solar_site.solar_resource', 'solar', 'solar_resource_data'],
 ]
 
 plant:

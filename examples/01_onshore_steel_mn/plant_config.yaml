@@ -35,8 +35,8 @@ tech_to_dispatch_connections: [
 ]
 resource_to_tech_connections: [
   # connect the wind resource to the wind technology
-  ['wind_resource', 'wind', 'wind_resource_data'],
-  ['solar_resource', 'solar', 'solar_resource_data'],
+  ['site.wind_resource', 'wind', 'wind_resource_data'],
+  ['site.solar_resource', 'solar', 'solar_resource_data'],
 ]
 
 plant:
