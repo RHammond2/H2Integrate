@@ -28,6 +28,7 @@
     listed at the bottom.
   - Remove unused dependencies.
   - Fixes typos for skipped folders.
+  - Fixes missing dependencies for `gis` modifier used in new iron mapping tests.
 - Updates all models in `supported_models` to map between a string version of the class name and
   the class itself. As such, all examples and documentation have been updated to properly instruct
   users to the change in model configuration naming conventions.
