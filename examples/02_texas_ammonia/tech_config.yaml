@@ -146,9 +146,9 @@ technologies:
 
   ammonia:
     performance_model:
-      model: "simple_ammonia_performance"
+      model: "SimpleAmmoniaPerformanceModel"
     cost_model:
-      model: "simple_ammonia_cost"
+      model: SimpleAmmoniaCostModel
     model_inputs:
       shared_parameters:
         plant_capacity_factor: 0.9

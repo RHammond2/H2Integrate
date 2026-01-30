@@ -198,8 +198,8 @@ supported_models = {
     "HydrogenEAFPlantCostComponent": HydrogenEAFPlantCostComponent,  # standalone model
     "ReverseOsmosisPerformanceModel": ReverseOsmosisPerformanceModel,
     "ReverseOsmosisCostModel": ReverseOsmosisCostModel,
-    "simple_ammonia_performance": SimpleAmmoniaPerformanceModel,
-    "simple_ammonia_cost": SimpleAmmoniaCostModel,
+    "SimpleAmmoniaPerformanceModel": SimpleAmmoniaPerformanceModel,
+    "SimpleAmmoniaCostModel": SimpleAmmoniaCostModel,
     "AmmoniaSynLoopPerformanceModel": AmmoniaSynLoopPerformanceModel,
     "AmmoniaSynLoopCostModel": AmmoniaSynLoopCostModel,
     "SteelPerformanceModel": SteelPerformanceModel,
