@@ -176,16 +176,8 @@ pip install -e ".[all]"
 4. Install H2Integrate and its dependencies:
 
     ```bash
-    conda install -y -c conda-forge glpk
+    conda install -y -c conda-forge glpk coin-or-cbc>=2.10.12
     ```
-
-    Note: Unix users should install Cbc via:
-
-    ```bash
-    conda install -y -c conda-forge coin-or-cbc=2.10.8
-    ```
-
-    Windows users will have to manually install Cbc: https://github.com/coin-or/Cbc.
 
     - If you want to just use H2Integrate:
 
