@@ -8,7 +8,6 @@ on:
     - cron: 0 0 * * MON
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
     strategy:
       max-parallel: 2
       matrix:
@@ -18,6 +17,7 @@ jobs:
         include:
           - python-version: '3.11'
             optional: true
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
       - name: Set up Python ${{ matrix.python-version }}
@@ -29,8 +29,14 @@ jobs:
         env:
           SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL: true
         run: |
-          conda install -y -c conda-forge glpk coin-or-cbc>=2.10.12 wisdem
-          pip install ".[develop]"
+          conda install -y -c conda-forge glpk coin-or-cbc>=2.10.12
+          pip install --upgrade pip
+          if [ "${{ matrix.optional }}" = "true" ]; then
+            conda install -y -c conda-forge wisdem
+            pip install ".[develop,extras]"
+          else
+            pip install ".[develop]"
+          fi
       - name: Create env file
         run: |
           touch .env
