@@ -36,16 +36,17 @@ jobs:
           touch .env
       - name: Run unit tests
         run: |
-          pytest . -m unit --cov=h2integrate --cov-report=xml:unit-coverage.xml
+          pytest . -m unit --cov=h2integrate --cov-report=lcov:unit-coverage.lcov
       - name: Run regression tests
         run: |
-          pytest . -m regression --cov=h2integrate --cov-report=xml:regression-coverage.xml
+          pytest . -m regression --cov=h2integrate --cov-report=lcov:regression-coverage.lcov
       - name: Run integration tests
         run: |
-          pytest . -m integration --cov=h2integrate --cov-report=xml:integration-coverage.xml
-      - name: Upload unit coverage to
-        uses: codecov/codecov-action@v5
+          pytest . -m integration --cov=h2integrate --cov-report=lcov:integration-coverage.lcov
+      - name: Upload test coverage
+        uses: coverallsapp/github-action@v2
+        if: contains( matrix.os, 'ubuntu') && contains( matrix.python-version, '3.13')
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: unit-coverage.xml, regression-coverage.xml, integration-coverage.xml
-          flags: unit,regression,integration
+          github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          files: unit-coverage.lcov, regression-coverage.lcov, integration-coverage.lcov
+          flag-name: unit,regression,integration
