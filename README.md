@@ -113,7 +113,7 @@ pip install h2integrate
 1. Using Git, navigate to a local target directory and clone repository:
 
     ```bash
-    git clone https://github.com/NREL/H2Integrate.git
+    git clone https://github.com/NatLabRockies/H2Integrate.git
     ```
 
 2. Navigate to `H2Integrate`
