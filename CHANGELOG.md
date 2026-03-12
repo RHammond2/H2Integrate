@@ -23,6 +23,8 @@
 - Bumps the `coin-or-cbc` dependency to at least 2.10.12 to enable easy Windows compatibility. [PR 590](https://github.com/NatLabRockies/H2Integrate/pull/590)
 - Uses the optional installation parameter `extras` to combine all analysis extras, and remove them
   from the `develop` options. [PR 590](https://github.com/NatLabRockies/H2Integrate/pull/590)
+- Tests reliant on the `gis` optional dependencies are no longer run when the extra dependencies are not installed
+  similar to the ard tests. [PR 590](https://github.com/NatLabRockies/H2Integrate/pull/590)
 
 ## 0.7 [March 3, 2026]
 
