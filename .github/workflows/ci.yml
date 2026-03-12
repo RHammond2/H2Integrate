@@ -17,14 +17,11 @@ jobs:
           - '3.11'
           - '3.13'
         optional:
-          - false
+          - true
         include:
           - python-version: '3.11'
-            optional: true
+            optional: false
             os: ubuntu-latest
-          - python-version: '3.11'
-            optional: true
-            os: windows-latest
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
