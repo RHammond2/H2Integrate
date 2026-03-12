@@ -25,6 +25,8 @@
   from the `develop` options. [PR 590](https://github.com/NatLabRockies/H2Integrate/pull/590)
 - Tests reliant on the `gis` optional dependencies are no longer run when the extra dependencies are not installed
   similar to the ard tests. [PR 590](https://github.com/NatLabRockies/H2Integrate/pull/590)
+- Updates the testing infrastructure to use function-scoped fixtures unless there is a specific need for sharing
+  data between functions in a module. [PR 590](https://github.com/NatLabRockies/H2Integrate/pull/590)
 
 ## 0.7 [March 3, 2026]
 
