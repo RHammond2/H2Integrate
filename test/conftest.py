@@ -67,7 +67,7 @@ def pytest_collection_modifyitems(config, items):
         raise pytest.UsageError(msg)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def temp_dir(tmp_path_factory):
     """Temp directory for YAML outputs."""
     temp_dir = tmp_path_factory.mktemp("temp_dir")
