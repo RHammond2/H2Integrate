@@ -1937,6 +1937,7 @@ def test_24_solar_battery_grid_example(subtests, temp_copy_of_example):
 
 @pytest.mark.integration
 @pytest.mark.parametrize("example_folder,resource_example_folder", [("28_iron_map", None)])
+@pytest.mark.skipif(importlib.util.find_spec("geopandas") is None, reason="`gis` not installed")
 def test_28_iron_map_example(subtests, temp_copy_of_example):
     import geopandas as gpd
     import matplotlib
