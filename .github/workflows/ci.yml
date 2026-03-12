@@ -27,18 +27,18 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Install base dependencies
         env:
           SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL: true
         run: |
           conda install -y -c conda-forge glpk coin-or-cbc>=2.10.12
           pip install --upgrade pip
-          if [ "${{ matrix.optional }}" = "true" ]; then
-            conda install -y -c conda-forge wisdem
-            pip install ".[develop,extras]"
-          else
-            pip install ".[develop]"
-          fi
+          pip install ".[develop]"
+      - if: ${{ matrix.optional }}
+        name: Install optional dependencies
+        run: |
+          conda install -y -c conda-forge wisdem
+          pip install ".[extras]"
       - name: Create env file
         run: |
           touch .env
