@@ -10,15 +10,21 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: ['3.11', '3.13']
-        optional: [false]
+        os:
+          - ubuntu-latest
+          - windows-latest
+        python-version:
+          - '3.11'
+          - '3.13'
+        optional:
+          - false
         include:
           - python-version: '3.11'
             optional: true
-            os:
-              - ubuntu-latest
-              - windows-latest
+            os: ubuntu-latest
+          - python-version: '3.11'
+            optional: true
+            os: windows-latest
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
