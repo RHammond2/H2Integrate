@@ -35,7 +35,7 @@ jobs:
           miniconda-version: latest
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-          active-environment: h2integrate
+          activate-environment: h2integrate
       - name: Install base dependencies
         shell: bash -el {0}
         env:
