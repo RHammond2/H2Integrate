@@ -32,9 +32,12 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: conda-incubator/setup-miniconda@v3
         with:
+          miniconda-version: latest
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
+          active-environment: h2integrate
       - name: Install base dependencies
+        shell: bash -el {0}
         env:
           SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL: true
         run: |
@@ -43,6 +46,7 @@ jobs:
           pip install ".[develop]"
       - if: ${{ matrix.optional }}
         name: Install optional dependencies
+        shell: bash -el {0}
         run: |
           conda install -y -c conda-forge wisdem
           pip install ".[extras]"
