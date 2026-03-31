@@ -4,8 +4,13 @@ from h2integrate.core.utilities import merge_shared_inputs
 from h2integrate.core.model_baseclasses import PerformanceModelBaseClass
 from h2integrate.converters.steel.steel_eaf_base import ElectricArcFurnacePerformanceBaseConfig
 
+from attrs import field, define
 
+from openmdao.utils import units
+# data[data_col] = units.convert_units(data[data_col], orig_units, desired_units)
+ 
 # NOTE: where should these live?
+# TODO: core > constants.py 
 # Conversion factors , Rows 133-143
 MMbtu_to_kWh = 293.0  # kWh, 'Model Inputs & Outputs!C134'
 MMbtu_to_MJ = 1055.0  # MJ, 'Model Inputs & Outputs!C135'
@@ -23,39 +28,60 @@ kmol_NG_to_MMbtu = 0.79  # MMBtu, approximated as CH4, 'Model Inputs & Outputs!C
 # NOTE: I imagine most hardcoced values in below performance components will be replaced with inputs
 # from config or feedstocks
 
+@define
+class CMUElectricArcFurnaceScrapOnlyPerformanceBaseConfig(BaseConfig):
+    """Configuration baseclass for CMUElectricArcFurnaceScrapOnlyPerformanceComponent.
 
-class ElectricArcFurnaceScrapOnlyPerformanceComponent(PerformanceModelBaseClass):
+    Attributes:
+        steel_production_rate_tonnes_per_hr (float): capacity of the steel processing plant
+            in units of metric tonnes of steel produced per hour.
+        water_density (float): water density in kg/m3 to use to calculate water volume
+            from mass. Defaults to 1000.0
+    """
+
+    # steel_capacity_rate_tonnes_per_year: float = field(default=2.2)   # metric tons/year
+    steel_production_rate_tonnes_per_year: float = field(default=2.0)   # metric tons/year
+    steel_percent_carbon: float = field(default=0.1 / 100) # mass fraction C in steel out, 'Model Inputs & Outputs!B26'
+    scrap_composition: dict = field(default={
+            "Fe": 94.0 / 100,  # mass fraction Fe, 'Model Inputs & Outputs!B27'
+            "SiO2": 1.0 / 100,  # mass fraction SiO2, 'Model Inputs & Outputs!B28'
+        })
+    # water_density: float = field(default=1000)  # kg/m3
+
+class CMUElectricArcFurnaceScrapOnlyPerformanceComponent(PerformanceModelBaseClass):
     def initialize(self):
-        super.initialize()
-        # NOTE: do we need to setup self.commodity* here?
+        super().initialize()
+        self.commodity = "steel"
+        self.commodity_rate_units = "t/h"
+        self.commodity_amount_units = "t"
 
     def setup(self):
-        super.setup()
+        super().setup()
 
         n_timesteps = self.options["plant_config"]["plant"]["simulation"]["n_timesteps"]
 
-        # NOTE: likely need to update this base config class or create a new one?
-        self.config = ElectricArcFurnacePerformanceBaseConfig.from_dict(
+        # NOTE: exposes shared inputs to performance and shared inputs 
+        self.config = CMUElectricArcFurnaceScrapOnlyPerformanceBaseConfig.from_dict(
             merge_shared_inputs(self.options["tech_config"]["model_inputs"], "performance"),
             strict=True,
             additional_cls_name=self.__class__.__name__,
         )
 
-        # NOTE: update based on feedback on baseconfig class
-        # steel_capacity = mTons/year, 'Model Inputs & Outputs!B11'
-        self.add_input(
-            "system_capacity",
-            val=self.config.steel_production_rate_tonnes_per_hr,
-            units=self.commodity_rate_units,
-            desc="Rated steel production capacity",
-        )
+        # TODO: remove
+        # steel_capacity = 2.2 mTons/year, 'Model Inputs & Outputs!B11'
+        # self.add_input(
+        #     "system_capacity",
+        #     val=self.config.steel_capacity_rate_tonnes_per_year,
+        #     units='t/year',
+        #     desc="Rated steel production capacity",
+        # )
 
         # annual_production = 2.0 mTons/year, 'Model Inputs & Outputs!B12'
         self.add_input(
             "annual_production",
-            val=self.config.steel_production_rate_tonnes_per_hr,  # update
-            units=self.commodity_rate_units,
-            desc="Rated steel production capacity",
+            val=self.config.steel_production_rate_tonnes_per_year,  # update
+            units='t/year',
+            desc="Actual steel production",
         )
 
         # NOTE: was going to add plant life = 40 years here but that seems to be part of the cost component in other models?
@@ -64,7 +90,19 @@ class ElectricArcFurnaceScrapOnlyPerformanceComponent(PerformanceModelBaseClass)
         # (everything under "Input feedstocks for EAF Fed with Scrap Only")
         # oxygen, electricity, natural gas, electrodes, scrap steel, coal, burnt doloma, burnt lime
         # Add feedstock inputs and outputs, default to 0 --> set using feedstock component
-        for feedstock, feedstock_units in self.feedstocks_to_units.items():
+
+        feedstocks_to_units = {
+            "oxygen":"m**3/t",
+            "electricity":"kWh/t",
+            "natural_gas":"MMBtu/t",
+            "electrodes":"kg/t",
+            "scrap":"t/t",
+            "coal":"t/t",
+            "doloma":"t/t",
+            "lime":"t/t"
+        }
+
+        for feedstock, feedstock_units in feedstocks_to_units.items():
             self.add_input(
                 f"{feedstock}_in",
                 val=0.0,
@@ -85,60 +123,54 @@ class ElectricArcFurnaceScrapOnlyPerformanceComponent(PerformanceModelBaseClass)
         self.add_output(
             "mass slag",  # == mass_slag_per_tscrap
             val=0.0,
-            shape=n_timesteps,  # NOTE: currently single value, need to vectorize for timeseries calcs
-            # units= # kg slag per ton scrap
-            desc="Total kg slag per ton scrap",
+            shape=n_timesteps, 
+            units="kg/t",
+            desc="Total unit of slag per unit of scrap",
         )
 
         self.add_output(
-            "mass MgO slag",  # == mass_MgO_slag_per_tscrap
+            "mass_MgO_slag",  # == mass_MgO_slag_per_tscrap
             val=0.0,
-            shape=n_timesteps,  # NOTE: currently single value, need to vectorize for timeseries calcs
-            # units= # kg MgOslag in per ton scrap
-            desc="Total kg MgO in slag per ton scrap",
+            shape=n_timesteps, 
+            units="kg/t",
+            desc="Total unit of MgO in slag per unit of scrap",
         )
 
         self.add_output(
-            "mass FeO slag",  # == mass_FeO_slag_per_tscrap
+            "mass_FeO_slag",  # == mass_FeO_slag_per_tscrap
             val=0.0,
-            shape=n_timesteps,  # NOTE: currently single value, need to vectorize for timeseries calcs
-            # units= # kg FeO in slag per ton scrap
-            desc="Total kg FeO in slag per ton scrap",
+            shape=n_timesteps, 
+            units="kg/t",
+            desc="Total unit of FeO in slag per unit of scrap",
         )
 
         self.add_output(
-            "mass Fe to FeO",  # == mass_Fe_to_FeO_tscrap
+            "mass_Fe_to_FeO",  # == mass_Fe_to_FeO_tscrap
             val=0.0,
-            shape=n_timesteps,  # NOTE: currently single value, need to vectorize for timeseries calcs
-            # units= # kg Fe consumed to produce FeO per ton scrap
-            desc="Total kg Fe consumed to produce FeO per ton scrap",
+            shape=n_timesteps, 
+            units="kg/t",
+            desc="Total unit of Fe consumed to produce FeO per unit of scrap",
         )
 
         self.add_output(
-            "mass Fe from scrap",  # == mass_Fe_DRI_per_tscrap
+            "mass_Fe_from_scrap",  # == mass_Fe_DRI_per_tscrap
             val=0.0,
-            shape=n_timesteps,  # NOTE: currently single value, need to vectorize for timeseries calcs
-            # units= # kg Fe from scrap per ton scrap
-            desc="Total kg Fe from scrap per ton scrap",
+            shape=n_timesteps, 
+            units="kg/t",
+            desc="Total unit of Fe from scrap per unit of scrap",
         )
 
         self.add_output(
-            "mass steel",  # == mass_steel_per_tscrap
+            "mass_steel",  # == mass_steel_per_tscrap
             val=0.0,
-            shape=n_timesteps,  # NOTE: currently single value, need to vectorize for timeseries calcs
-            # units= # kg Steel formed from DRI + scrap per tscrap
-            desc="Total kg Steel formed from DRI + scrap per ton scrap",
+            shape=n_timesteps, 
+            units="kg/t",
+            desc="Total unit of steel formed from EAF fed with scrap only per unit of scrap",
         )
 
     def compute(self, inputs, outputs):
         # NOTE: where should these live as inputs / config / feedstocks?
         # Steel and scrap composition
-        pct_carbon_steel = 0.1 / 100  # mass fraction C, 'Model Inputs & Outputs!B26'
-        scrap_composition = {
-            "Fe": 94.0 / 100,  # mass fraction Fe, 'Model Inputs & Outputs!B27'
-            "SiO2": 1.0 / 100,  # mass fraction SiO2, 'Model Inputs & Outputs!B28'
-        }
-
         # NOTE update below 2 feedstock sections to get feedstocks appropriately based on updates in setup
         # get feedstocks
 
@@ -149,15 +181,16 @@ class ElectricArcFurnaceScrapOnlyPerformanceComponent(PerformanceModelBaseClass)
 
         # 12. EAF Mass & Energy Balance
         # Essential Mass Summary
-        mass_steel_stream = 1000.0  # kg liquid steel, '12. EAF Mass & Energy Balance!D4'
-        pct_carbon_steel = pct_carbon_steel  # % mass C, 'Model Inputs & Outputs!B26' > '12. EAF Mass & Energy Balance!D5'
+        # NOTE: This is probably the equivalent of system_capacity / annual_production
+        mass_steel_stream = units.convert_units(inputs["annual_production"], 't/year', 'kg/year')  # kg liquid steel, '12. EAF Mass & Energy Balance!D4'
+        pct_carbon_steel = self.config.steel_percent_carbon  # % mass C, 'Model Inputs & Outputs!B26' > '12. EAF Mass & Energy Balance!D5'
         mass_iron_per_tLS = mass_steel_stream * (
             1 - pct_carbon_steel
         )  # kg Fe/ton liquid steel, '12. EAF Mass & Energy Balance!D7'
         mass_carbon_per_tLS = (
             mass_steel_stream * pct_carbon_steel
         )  # kg C/ton liquid steel, '12. EAF Mass & Energy Balance!D8'
-        scrap_composition = scrap_composition  # % mass Fe, 'Model Inputs & Outputs!B27'
+        scrap_composition = self.config.scrap_composition  # % mass Fe, 'Model Inputs & Outputs!B27'
         # % mass SiO2, 'Model Inputs & Outputs!B28'
 
         # Electric Arc Furnace Fed with Scrap Only - Mass Balance (Fe, C, O, MgO, SiO2, Al2O3, CaO)
