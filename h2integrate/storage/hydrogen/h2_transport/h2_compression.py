@@ -18,6 +18,7 @@ class Compressor:
         p_inlet=20,
         n_compressors=2,
         sizing_safety_factor=1.1,
+        isentropic_efficiency=0.88,
     ):
         """
         Parameters:
@@ -61,9 +62,7 @@ class Compressor:
 
         cpcv = 1.41  # H2 Cp/Cv ratio
         sizing = self.sizing_safety_factor  # 110% based on typical industrial practices
-        isentropic_efficiency = (
-            0.88  # 0.88 based on engineering estimation for a reciprocating compressor
-        )
+        isentropic_efficiency = self.isentropic_efficiency
 
         # https://h2tools.org/hyarc/hydrogen-data/hydrogen-compressibility-different-temperatures-and-pressures  # noqa: E501
         Z_pressures = [

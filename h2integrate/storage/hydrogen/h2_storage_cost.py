@@ -12,9 +12,22 @@ from h2integrate.storage.hydrogen.h2_transport.h2_compression import Compressor
 class HydrogenStorageBaseCostModelConfig(BaseConfig):
     """Base config class for HydrogenStorageBaseCostModel.
 
-    Fields include `max_capacity`, `max_charge_rate`, `sizing_mode`, `commodity_name`,
-    `commodity_units`, `cost_year`, `labor_rate`, `insurance`, `property_taxes`,
-    `licensing_permits`, `compressor_om`, and `facility_om`.
+    Fields:
+    - `max_capacity`
+    - `max_charge_rate`
+    - `sizing_mode`
+    - `commodity_name`,
+    - `commodity_units`
+    - `cost_year`
+    - `labor_rate`
+    - `insurance`
+    - `property_taxes`,
+    - `licensing_permits`
+    - `compressor_om`
+    - `facility_om`
+    - `inlet_pressure_bar`
+    - `storage_pressure_bar`
+    - `storage_compressor_isen_eff` : Isentropic efficiency of storage compressor
     """
 
     max_capacity: float | None = field(default=None)
@@ -33,6 +46,8 @@ class HydrogenStorageBaseCostModelConfig(BaseConfig):
     licensing_permits: float = field(default=0.001, validator=range_val(0, 1))
     compressor_om: float = field(default=0.04, validator=range_val(0, 1))
     facility_om: float = field(default=0.01, validator=range_val(0, 1))
+    inlet_pressure_bar: float = field(default=20, validator=gte_zero)
+    storage_pressure_bar: float = field(default=200, validator=gte_zero)
 
     def __attrs_post_init__(self):
         undefined_capacities = self.max_capacity is None or self.max_charge_rate is None
@@ -526,3 +541,74 @@ class PipeStorageCostModel(HydrogenStorageBaseCostModel):
 
         outputs["CapEx"] = installed_capex
         outputs["OpEx"] = total_om
+
+
+class CompressedGasStorageCostModel(HydrogenStorageBaseCostModel):
+    """Capital and operational cost model for compressed gas hydrogen storage.
+
+    This model is based on HDSAM's compressed gas hydrogen storage terminal cost model, which is
+    designed for loading of trucks with compressed H2. In this model, we isolate just the parts of
+    the HDSAM that relate to filling and storage, and ignoring the costs related to truck loading.
+
+    Costs have been converted to 2018 costs to match the models above using CEPCI values in HDSAM.
+
+    References:
+        [1] HDSAM V5.5 Compressed Gas H2 Terminal: https://hdsam.es.anl.gov/index.php?content=hdsam
+    """
+
+    def compute(self, inputs, outputs, discrete_inputs, discrete_outputs):
+        """Calculate installed capital and O&M costs for lined rock cavern hydrogen storage.
+
+        Args:
+            inputs: OpenMDAO inputs containing ``max_capacity`` (total capacity [kg]),
+                ``max_charge_rate`` (charge rate [kg/h]), and ``hydrogen_in``
+                (timeseries [kg/h]).
+            outputs: OpenMDAO outputs dict.
+            discrete_inputs: OpenMDAO discrete inputs dict.
+            discrete_outputs: OpenMDAO discrete outputs dict.
+
+        Sets:
+            outputs["CapEx"]: Installed capital cost in 2018 USD (including compressor).
+            outputs["OpEx"]: Annual fixed O&M in 2018 USD/yr (excluding electricity).
+        """
+
+        # ============================================================================
+        # Design inputs
+        # ============================================================================
+        # Relevant design parameters (mostly rows 32-74 of "Compressed Gas H2 Terminal" in [1])
+
+        terminal_capacity_kg_d = units.convert_units(
+            inputs["storage_capacity"], f"({self.config.commodity_units})", "kg/day"
+        )
+        n_compressors = terminal_capacity_kg_d / 24 / 50
+        # Not sure where the 50 comes from in HDSAM - using rule of thumb of 1 unit per 50 kg/hr?
+        isentropic_efficiency = 0.75
+        storage_compressor = Compressor(
+            p_inlet=self.config.inlet_pressure_bar,
+            p_outlet=self.config.storage_pressure_bar,
+            flow_rate_kg_d=terminal_capacity_kg_d,
+            n_compressors=n_compressors,
+            isentropic_efficiency=isentropic_efficiency,
+        )
+
+        # ============================================================================
+        # Calculate CAPEX
+        # ============================================================================
+        # Installed capital cost per kg from rows 158-180 of "Compressed Gas H2 Terminal" in [1]
+
+        # "Truck Loading Compressor" from HDSAM is not included
+
+        # Storage Compressor
+        storage_compressor.compressor_power()
+        unit_power_kw, system_power_kw = storage_compressor.compressor_system_power()
+        compressor_capex_2016, _ = storage_compressor.compressor_costs()
+        1.36013289036545 / 1.2890365448505 * compressor_capex_2016
+
+        # Compressed Gas H2 Storage
+        # tank_capex_2018
+
+        # Remainder of Terminal
+        # piping_supply_dischage_headers
+        # plumbing_electrical_instsrumentation
+        # buildings_structures
+        # "Truck scale" is ignore
