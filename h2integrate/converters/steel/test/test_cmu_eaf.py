@@ -2,7 +2,7 @@ import pytest
 import openmdao.api as om
 from pytest import fixture
 
-from h2integrate.converters.steel.electric_arc_furnace import (
+from h2integrate.converters.steel.cmu_electric_arc_furnace_scrap import (
     CMUElectricArcFurnaceScrapOnlyPerformanceComponent,
 )
 
