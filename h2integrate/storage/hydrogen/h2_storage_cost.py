@@ -577,18 +577,16 @@ class CompressedGasStorageCostModel(HydrogenStorageBaseCostModel):
         # Relevant design parameters (mostly rows 32-74 of "Compressed Gas H2 Terminal" in [1])
 
         terminal_capacity_kg_d = units.convert_units(
-            inputs["storage_capacity"], f"({self.config.commodity_units})", "kg/day"
+            inputs["storage_capacity"], f"({self.config.commodity_units})", "kg/d"
         )
         n_compressors = terminal_capacity_kg_d / 24 / 50  # Cell B59
         # Not sure where the 50 comes from in HDSAM - using rule of thumb of 1 unit per 50 kg/hr?
-        isentropic_efficiency = 0.75
         storage_compressor = Compressor(
             compressor_type="storage",
             p_inlet=self.config.inlet_pressure_bar,
             p_outlet=self.config.storage_pressure_bar,
             flow_rate_kg_d=terminal_capacity_kg_d,
             n_compressors=n_compressors,
-            isentropic_efficiency=isentropic_efficiency,
         )
 
         # ============================================================================
@@ -604,8 +602,8 @@ class CompressedGasStorageCostModel(HydrogenStorageBaseCostModel):
         # Storage Compressor
         storage_compressor.compressor_power()
         unit_power_kw, system_power_kw = storage_compressor.compressor_system_power()
-        compressor_capex_2016, _ = storage_compressor.compressor_costs()
-        compressor_capex = compressor_capex_2016 * 1.36013289036545 / 1.2890365448505
+        comp_capex_2016, _ = storage_compressor.compressor_costs()
+        comp_capex = comp_capex_2016 * 1.36013289036545 / 1.2890365448505
         # Values taken from CEPCI table in "Feedstock & Utility Prices"
 
         # Compressed Gas H2 Storage
@@ -642,7 +640,7 @@ class CompressedGasStorageCostModel(HydrogenStorageBaseCostModel):
         land_capex = land_capex_2022 * 0.88  # Using CPI to convert to 2018 no CEPCI for land)
 
         # Other
-        depreciable_capex = compressor_capex + tank_capex + pipe_capex + pei_capex + buildings_capex
+        depreciable_capex = comp_capex + tank_capex + pipe_capex + pei_capex + buildings_capex
         site_preparation_pct = 0.05
         engineering_design_pct = 0.1
         project_contingency_pct = 0.1
@@ -663,31 +661,44 @@ class CompressedGasStorageCostModel(HydrogenStorageBaseCostModel):
         # Final, total installed cost:
         installed_capex = depreciable_capex + land_capex + other_capex
 
-        # # ============================================================================
-        # # Calculate OPEX - NEEDS TO BE UPDATED
-        # # ============================================================================
-        # # Operations and Maintenance costs [3]
-        # # Labor
-        # # Base case is 1 operator, 24 hours a day, 7 days a week for a 100,000 kg/day
-        # # average capacity facility. Scaling factor of 0.25 is used for other sized facilities
-        # annual_hours = 8760 * (system_flow_rate / 100000) ** 0.25
-        # overhead = 0.5
-        # labor = (annual_hours * labor_rate) * (1 + overhead)  # Burdened labor cost
-        # insurance_cost = insurance * installed_capex
-        # property_taxes_cost = property_taxes * installed_capex
-        # licensing_permits_cost = licensing_permits * installed_capex
-        # comp_op_maint = comp_om * comp_capex
-        # facility_op_maint = facility_om * (installed_capex - comp_capex)
+        # ============================================================================
+        # Calculate OPEX - NEEDS TO BE UPDATED
+        # ============================================================================
+        # Operations and Maintenance costs [1]
 
-        # # O&M excludes electricity requirements
-        # total_om = (
-        #     labor
-        #     + insurance_cost
-        #     + licensing_permits_cost
-        #     + property_taxes_cost
-        #     + comp_op_maint
-        #     + facility_op_maint
-        # )
+        # Labor
+        # Base case is 2 operators, 24 hours a day, 7 days a week for a 100,000 kg/day
+        # average capacity facility. Scaling factor of 0.25 is used for other sized facilities
+        # See equation on HDSAM "Cost Data" tab, row 12
+        # Cost corrected to 2018 using HDSAM "Feedstock & Utility Prices" tab, Table B3
+        system_flow_rate = self.flow_rate_kg_d
+        annual_hours = 2 * 8760 * (system_flow_rate / 100000) ** 0.25
+        labor_rate_2013 = 27.51
+        labor_rate = labor_rate_2013 * 1.29 / 1.09
+        overhead = 0.5
+        labor_om = annual_hours * labor_rate * overhead
+
+        # Other O&M
+        insurance_pct = 0.01  # "Compressed Gas H2 Terminal" tab, cell B229
+        property_taxes_pct = 0.01  # "Compressed Gas H2 Terminal" tab, cell B229
+        licensing_permits_pct = 0.001
+        comp_om_pct = 0.04
+        facility_om_pct = 0.01
+        insurance_om = insurance_pct * installed_capex
+        property_taxes_om = property_taxes_pct * installed_capex
+        licensing_permits_om = licensing_permits_pct * installed_capex
+        comp_om = comp_om_pct * comp_capex
+        facility_om = facility_om_pct * (installed_capex - comp_capex)
+
+        # O&M excludes electricity requirements
+        total_om = (
+            labor_om
+            + insurance_om
+            + licensing_permits_om
+            + property_taxes_om
+            + comp_om
+            + facility_om
+        )
 
         outputs["CapEx"] = installed_capex
-        # outputs["OpEx"] = total_om
+        outputs["OpEx"] = total_om

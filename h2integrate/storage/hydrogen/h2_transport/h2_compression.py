@@ -19,16 +19,16 @@ class Compressor:
         p_inlet=20,
         n_compressors=2,
         sizing_safety_factor=1.1,
-        isentropic_efficiency=0.88,
     ):
         """
         Parameters:
         ---------------
-        type: "pipeline" or "storage"
+        compressor_type: "pipeline" or "storage"
         p_inlet: inlet pressure (bar)
         p_outlet: outlet pressure (bar)
         flow_rate_kg_d: mass flow rate in kg/day
         """
+        self.compressor_type = compressor_type
         self.p_inlet = p_inlet  # bar
         self.p_outlet = p_outlet  # bar
         self.flow_rate_kg_d = flow_rate_kg_d  # kg/day
@@ -65,7 +65,9 @@ class Compressor:
 
         cpcv = 1.41  # H2 Cp/Cv ratio
         sizing = self.sizing_safety_factor  # 110% based on typical industrial practices
-        isentropic_efficiency = self.isentropic_efficiency
+        isentropic_efficiency = (
+            0.88  # 0.88 based on engineering estimation for a reciprocating compressor
+        )
 
         # https://h2tools.org/hyarc/hydrogen-data/hydrogen-compressibility-different-temperatures-and-pressures  # noqa: E501
         Z_pressures = [
