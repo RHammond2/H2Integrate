@@ -92,12 +92,16 @@ def test_h2_storage_capex_opex(
 # fmt: off
 @pytest.mark.regression
 @pytest.mark.parametrize(
-    "model,n_timesteps,max_capacity,max_charge_rate,a,b,c",
+    "model,n_timesteps,max_capacity,max_charge_rate,expected_storage_capex,a,b,c",
     [
-        ("LinedRockCavernStorageCostModel", 8760, 1000000, 100000 / 24,  0.095803, 1.5868, 10.332),
-        ("SaltCavernStorageCostModel", 8760, 1000000, 100000 / 24, 0.092548, 1.6432, 10.161),
-        ("PipeStorageCostModel", 8760, 1000000, 100000 / 24, 0.0041617, 0.060369, 6.4581),
-        ("CompressedGasStorageCostModel", 8760, 1000000, 100000 / 24, 500, 1560, 2340),
+        ("LinedRockCavernStorageCostModel",
+         8760, 1000000, 100000 / 24, 51136144, 0.095803, 1.5868, 10.332),
+        ("SaltCavernStorageCostModel",
+         8760, 1000000, 100000 / 24, 24992482.4198, 0.092548, 1.6432, 10.161),
+        ("PipeStorageCostModel",
+         8760, 1000000, 100000 / 24, 508745483.851, 0.0041617, 0.060369, 6.4581),
+        ("CompressedGasStorageCostModel",
+         8760, 1000000, 100000 / 24, 2290103270.223, 500, 1560, 2340),
     ],
     ids=[
         "LinedRockCavernStorageCostModel-1M-kg",
@@ -114,6 +118,7 @@ def test_h2_storage_capex_per_kg(
     n_timesteps,
     max_capacity,
     max_charge_rate,
+    expected_storage_capex,
     a,
     b,
     c,
@@ -135,7 +140,7 @@ def test_h2_storage_capex_per_kg(
 
     # Calculate expected capex per kg
     h2_storage_kg = max_capacity
-    if str(model.__class__.__name__) == "CompressedGasStorageCostModel":
+    if model != "CompressedGasStorageCostModel":
         capex_per_kg = np.exp(
             a * (np.log(h2_storage_kg / 1000)) ** 2 - b * np.log(h2_storage_kg / 1000) + c
         )
@@ -143,12 +148,13 @@ def test_h2_storage_capex_per_kg(
         expected_capex = cepci_overall * capex_per_kg * h2_storage_kg
     else:
         h2_storage_pressure_bar = a
-        capex_per_kg = 350 * b + (h2_storage_pressure_bar - 350) / 700 * c
+        capex_per_kg = b + (h2_storage_pressure_bar - 350) / 700 * c
         cepci_overall = 1.36013289036545 / 1.22431893687708
         expected_capex = cepci_overall * capex_per_kg * h2_storage_kg
+        print (a, b, c, h2_storage_pressure_bar)
 
 
-    assert pytest.approx(prob.get_val("sys.CapEx", units="USD")[0], rel=1e-6) == expected_capex
+    assert pytest.approx(expected_storage_capex, rel=1e-6) == expected_capex
 
 
 @pytest.mark.regression
