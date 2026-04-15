@@ -24,25 +24,25 @@ def tech_config(max_capacity, max_charge_rate):
 @pytest.mark.parametrize(
     "model,n_timesteps,max_capacity,max_charge_rate,expected_capex,expected_opex,expected_var_opex,cost_year",
     [
-        # ("SaltCavernStorageCostModel", 8760, 3580383.39133725, 12549.62622698, 65337437.17944019, 3149096.037312646, 0, 2018),  # noqa: E501
-        # ("LinedRockCavernStorageCostModel", 8760, 169320.79994693, 1568.70894716, 18693728.23242369, 1099582.4333529277, 0, 2018),  # noqa: E501
-        # ("LinedRockCavernStorageCostModel", 8760, 2081385.93267781, 14118.14678877, 92392496.03198986, 4292680.718474801, 0, 2018),  # noqa: E501
-        # ("LinedRockCavernStorageCostModel", 8760, 2987042.0, 12446.00729773, 1.28437699 * 1e8, 5315184.827689768, 0, 2018),  # noqa: E501
-        # ("PipeStorageCostModel", 8760, 3580383.39133725, 12549.62622698, 1827170156.1390543, 57720829.60694359, 0, 2018),  # noqa: E501
-        # ("LinedRockCavernStorageCostModel", 8760, 1000000, 100000 / 24, 51136144, 2359700.44640052, 0, 2018),  # noqa: E501
-        # ("SaltCavernStorageCostModel", 8760, 1000000, 100000 / 24, 24992482.4198, 1461663.9089168755, 0, 2018),  # noqa: E501
-        # ("PipeStorageCostModel", 8760, 1000000, 100000 / 24, 508745483.851, 16439748.432128396, 0, 2018),  # noqa: E501
+        ("SaltCavernStorageCostModel", 8760, 3580383.39133725, 12549.62622698, 65337437.17944019, 3149096.037312646, 0, 2018),  # noqa: E501
+        ("LinedRockCavernStorageCostModel", 8760, 169320.79994693, 1568.70894716, 18693728.23242369, 1099582.4333529277, 0, 2018),  # noqa: E501
+        ("LinedRockCavernStorageCostModel", 8760, 2081385.93267781, 14118.14678877, 92392496.03198986, 4292680.718474801, 0, 2018),  # noqa: E501
+        ("LinedRockCavernStorageCostModel", 8760, 2987042.0, 12446.00729773, 1.28437699 * 1e8, 5315184.827689768, 0, 2018),  # noqa: E501
+        ("PipeStorageCostModel", 8760, 3580383.39133725, 12549.62622698, 1827170156.1390543, 57720829.60694359, 0, 2018),  # noqa: E501
+        ("LinedRockCavernStorageCostModel", 8760, 1000000, 100000 / 24, 51136144, 2359700.44640052, 0, 2018),  # noqa: E501
+        ("SaltCavernStorageCostModel", 8760, 1000000, 100000 / 24, 24992482.4198, 1461663.9089168755, 0, 2018),  # noqa: E501
+        ("PipeStorageCostModel", 8760, 1000000, 100000 / 24, 508745483.851, 16439748.432128396, 0, 2018),  # noqa: E501
         ("CompressedGasStorageCostModel", 8760, 1000000, 100000 / 24, 3797018181.2403545, 120116796.4930816, 0, 2018),  # noqa: E501
     ],
     ids=[
-        # "SaltCavernStorageCostModel-ex2",
-        # "LinedRockCavernStorageCostModel-ex12-small",
-        # "LinedRockCavernStorageCostModel-ex1",
-        # "LinedRockCavernStorageCostModel-ex14",
-        # "PipeStorageCostModel",
-        # "LinedRockCavernStorageCostModel-1M-kg",
-        # "SaltCavernStorageCostModel-1M-kg",
-        # "PipeStorageCostModel-1M-kg",
+        "SaltCavernStorageCostModel-ex2",
+        "LinedRockCavernStorageCostModel-ex12-small",
+        "LinedRockCavernStorageCostModel-ex1",
+        "LinedRockCavernStorageCostModel-ex14",
+        "PipeStorageCostModel",
+        "LinedRockCavernStorageCostModel-1M-kg",
+        "SaltCavernStorageCostModel-1M-kg",
+        "PipeStorageCostModel-1M-kg",
         "CompressedGasStorageCostModel-1M-kg",
     ]
 )

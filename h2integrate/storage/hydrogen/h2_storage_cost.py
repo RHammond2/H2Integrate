@@ -231,8 +231,12 @@ class LinedRockCavernStorageCostModel(HydrogenStorageBaseCostModel):
         # ============================================================================
         outlet_pressure = 200  # Max outlet pressure of lined rock cavern in [1] [bar]
         n_compressors = 2
+        comp_type = "pipeline"
         storage_compressor = Compressor(
-            outlet_pressure, system_flow_rate, n_compressors=n_compressors
+            outlet_pressure,
+            system_flow_rate,
+            n_compressors=n_compressors,
+            compressor_type=comp_type,
         )
         storage_compressor.compressor_power()
         motor_rating, power = storage_compressor.compressor_system_power()
@@ -356,8 +360,12 @@ class SaltCavernStorageCostModel(HydrogenStorageBaseCostModel):
         # ============================================================================
         outlet_pressure = 120  # Max outlet pressure of salt cavern in [1] [bar]
         n_compressors = 2
+        comp_type = "pipeline"
         storage_compressor = Compressor(
-            outlet_pressure, system_flow_rate, n_compressors=n_compressors
+            outlet_pressure,
+            system_flow_rate,
+            n_compressors=n_compressors,
+            compressor_type=comp_type,
         )
         storage_compressor.compressor_power()
         motor_rating, power = storage_compressor.compressor_system_power()
@@ -495,8 +503,12 @@ class PipeStorageCostModel(HydrogenStorageBaseCostModel):
             compressor_output_pressure  # Max outlet pressure of underground pipe storage [1] [bar]
         )
         n_compressors = 2
+        comp_type = "pipeline"
         storage_compressor = Compressor(
-            outlet_pressure, system_flow_rate, n_compressors=n_compressors
+            outlet_pressure,
+            system_flow_rate,
+            n_compressors=n_compressors,
+            compressor_type=comp_type,
         )
         storage_compressor.compressor_power()
         motor_rating, power = storage_compressor.compressor_system_power()
