@@ -167,6 +167,7 @@ technologies:
         # we set the sizing mode to 'auto' rather than defining the capacities
         # in the input file
         sizing_mode: auto  # set as "auto" so storage capacity doesnt have to be defined
+        storage_pressure_bar: 500
   n2_feedstock:
     performance_model:
       model: FeedstockPerformanceModel

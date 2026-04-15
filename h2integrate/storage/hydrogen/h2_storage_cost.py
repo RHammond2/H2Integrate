@@ -576,10 +576,14 @@ class CompressedGasStorageCostModel(HydrogenStorageBaseCostModel):
         # ============================================================================
         # Relevant design parameters (mostly rows 32-74 of "Compressed Gas H2 Terminal" in [1])
 
-        terminal_capacity_kg_d = units.convert_units(
-            inputs["storage_capacity"], f"({self.config.commodity_units})", "kg/d"
+        h2_in_kg_d = units.convert_units(
+            inputs["hydrogen_in"], f"({self.config.commodity_units})", "kg/d"
         )
-        n_compressors = terminal_capacity_kg_d / 24 / 50  # Cell B59
+        terminal_capacity_kg_d = np.max(h2_in_kg_d)
+        storage_capacity_kg = units.convert_units(
+            inputs["storage_capacity"][0], f"({self.config.commodity_units})*h", "kg"
+        )
+        n_compressors = np.ceil(terminal_capacity_kg_d / 24 / 50)  # Cell B59
         # Not sure where the 50 comes from in HDSAM - using rule of thumb of 1 unit per 50 kg/hr?
         storage_compressor = Compressor(
             compressor_type="storage",
@@ -613,28 +617,33 @@ class CompressedGasStorageCostModel(HydrogenStorageBaseCostModel):
         tank_capex_per_kg_2013 = (
             capex_per_kg_350_bar_2013
             + (capex_per_kg_700_bar_2013 - capex_per_kg_350_bar_2013)
-            * (self.storage_pressure_bar - 350)
+            * (self.config.storage_pressure_bar - 350)
             / 350
         )
-        capex_2013 = tank_capex_per_kg_2013 * self.max_capacity
+        capex_2013 = tank_capex_per_kg_2013 * storage_capacity_kg
         tank_capex = capex_2013 * 1.36013289036545 / 1.22431893687708
 
         # Piping - simplifying a bit from HDSAM since this is a "drop in the bucket"
-        pipe_length_m = 98.3  # Using the value for starting case instead of complex HDSAM calc.
-        pipe_capex_per_m_2022 = 300  # Using H2A base case instead of complex HDSAM calc.
-        pipe_capex_2022 = pipe_length_m * pipe_capex_per_m_2022
-        pipe_capex = pipe_capex_2022 * 1.53471220137887 / 2.35626102292769
+        kg_d_per_pipe_m = 300  # Estimated by dividing B34 by B104 for many different values
+        pipe_length_m = terminal_capacity_kg_d / kg_d_per_pipe_m  # Simplifying calc of B104
+        pipe_capex_per_m_2005 = 300  # Using H2A "Estimate based on engineering judgement"
+        pipe_capex_2005 = pipe_length_m * pipe_capex_per_m_2005
+        pipe_capex = pipe_capex_2005 * 1.53471220137887 / 1.0
 
-        # Plumbing, electrical, instrumentation capex = "pei"
-        pei_capex_2022 = 20454
-        pei_capex = pei_capex_2022 * 1.45283525933889 / 2.0454178984144
+        # Plumbing, electrical, instrumentation capex = "pei" - simplifying a bit from HDSAM
+        kg_d_per_bay = 1600  # Estimated by dividing B34 by B103 for many different values
+        num_bays = terminal_capacity_kg_d / kg_d_per_bay  # Simplifying calc of B103
+        pipe_capex_per_bay_2005 = 10000  # Using H2A "Estimate based on engineering judgement"
+        pei_capex_2005 = num_bays * pipe_capex_per_bay_2005
+        pei_capex = pei_capex_2005 * 2.0454178984144 / 1.0
 
         # Buildings and structures
         buildings_capex_2022 = 370029
         buildings_capex = buildings_capex_2022 * 1.33340822287126 / 1.85014603459897
 
-        # Land - simplifying and taking constants
-        land_required_m2 = 5236
+        # Land - simplifying
+        kg_d_per_land_m2 = 4  # Estimated by dividing B34 by B192 for many different values
+        land_required_m2 = terminal_capacity_kg_d / kg_d_per_land_m2
         land_capex_per_m2_2022 = 12.35
         land_capex_2022 = land_required_m2 * land_capex_per_m2_2022
         land_capex = land_capex_2022 * 0.88  # Using CPI to convert to 2018 no CEPCI for land)
@@ -671,7 +680,7 @@ class CompressedGasStorageCostModel(HydrogenStorageBaseCostModel):
         # average capacity facility. Scaling factor of 0.25 is used for other sized facilities
         # See equation on HDSAM "Cost Data" tab, row 12
         # Cost corrected to 2018 using HDSAM "Feedstock & Utility Prices" tab, Table B3
-        system_flow_rate = self.flow_rate_kg_d
+        system_flow_rate = terminal_capacity_kg_d
         annual_hours = 2 * 8760 * (system_flow_rate / 100000) ** 0.25
         labor_rate_2013 = 27.51
         labor_rate = labor_rate_2013 * 1.29 / 1.09
