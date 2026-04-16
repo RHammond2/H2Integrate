@@ -1,3 +1,4 @@
+(h2-storage-cost)=
 # Bulk Hydrogen Storage Cost Model
 
 This models the cost of bulk storage of hydrogen based on the total kg capacity and kg/h charge/discharge requirements.
