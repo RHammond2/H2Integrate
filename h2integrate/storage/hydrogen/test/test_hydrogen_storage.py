@@ -32,7 +32,7 @@ def tech_config(max_capacity, max_charge_rate):
         ("LinedRockCavernStorageCostModel", 8760, 1000000, 100000 / 24, 51136144, 2359700.44640052, 0, 2018),  # noqa: E501
         ("SaltCavernStorageCostModel", 8760, 1000000, 100000 / 24, 24992482.4198, 1461663.9089168755, 0, 2018),  # noqa: E501
         ("PipeStorageCostModel", 8760, 1000000, 100000 / 24, 508745483.851, 16439748.432128396, 0, 2018),  # noqa: E501
-        ("CompressedGasStorageCostModel", 8760, 1000000, 100000 / 24, 3797018181.2403545, 120116796.4930816, 0, 2018),  # noqa: E501
+        ("CompressedGasStorageCostModel", 8760, 1000000, 100000 / 24, 2943465745.086474, 93656670.9723113, 0, 2018),  # noqa: E501
     ],
     ids=[
         "SaltCavernStorageCostModel-ex2",
@@ -101,7 +101,7 @@ def test_h2_storage_capex_opex(
         ("PipeStorageCostModel",
          8760, 1000000, 100000 / 24, 508745483.851, 0.0041617, 0.060369, 6.4581),
         ("CompressedGasStorageCostModel",
-         8760, 1000000, 100000 / 24, 2290103270.223, 500, 1560, 2340),
+         8760, 1000000, 100000 / 24, 1761617900.172114, 500, 1200, 1800),
     ],
     ids=[
         "LinedRockCavernStorageCostModel-1M-kg",
