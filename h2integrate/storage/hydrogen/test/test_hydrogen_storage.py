@@ -123,7 +123,15 @@ def test_h2_storage_capex_per_kg(
     b,
     c,
 ):
-    """Test based on original test_lined_rock_storage.py with 1M kg storage capacity."""
+    """
+    Tests calculation of H2 storage costs based on storage capacity.
+
+    For cavern/pipe methods polynomial coefficients `a`, `b` and `c` are used to calculate capex,
+    and `expected_storage_capex` is the *total* capex, which scales with capacity.
+
+    For compressed gas, `a` is storage pressure, `b` and `c` are capex/kg at 350 and 700 bar,
+    and `exptected_storage_capex` is the *tank* component of capex, which scales with capacity.
+    """
     prob = om.Problem()
     comp = supported_models[model](
         plant_config=plant_config,
@@ -151,7 +159,6 @@ def test_h2_storage_capex_per_kg(
         capex_per_kg = b + (h2_storage_pressure_bar - 350) / 700 * c
         cepci_overall = 1.36013289036545 / 1.22431893687708
         expected_capex = cepci_overall * capex_per_kg * h2_storage_kg
-        print (a, b, c, h2_storage_pressure_bar)
 
 
     assert pytest.approx(expected_storage_capex, rel=1e-6) == expected_capex
