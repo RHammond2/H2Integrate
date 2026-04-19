@@ -13,7 +13,6 @@ from h2integrate.tools.constants import (
     O2_MW,
     CAO_MW,
     CH4_MW,
-    CO2_MW,
     FEO_MW,
     MGO_MW,
     SIO2_MW,
@@ -48,13 +47,13 @@ class CMUElectricArcFurnaceDRIPerformanceConfig(BaseConfig):
             "SiO2": 1.0 / 100,  # mass fraction SiO2, 'Model Inputs & Outputs!B28'
         }
     )
-    pellet_grade: str = field(validator=contains(["DR", "BF", "custom"]))
+    pellet_grade: str = field(default="DR", validator=contains(["DR", "BF", "custom"]))
     pct_DRI: float = field(default=60.0 / 100)  # mass fraction, 'Model Inputs & Outputs!B61'
     DRI_feed_temp: str = field(
-        default="hot", validator=contains["hot", "cold"]
+        default="hot", validator=contains(["hot", "cold"])
     )  # hot = 873 K or cold = 298 K, 'Model Inputs & Outputs!B63'
-    DRI_composition: dict = field(default={})
-    SiO2_ratio: float = field(default=None)
+    DRI_composition: dict[str, float] | None = None
+    SiO2_ratio: float | None = None
     energy_mass_balance_dict: dict = field(
         default={
             # MMBtu/ton steel, '5. Electric Arc Furnace!C32'
@@ -90,64 +89,101 @@ class CMUElectricArcFurnaceDRIPerformanceConfig(BaseConfig):
         }
     )
 
-    def __attrs__post__init__(self):
+    def __attrs_post_init__(self):
         if self.pellet_grade == "DR":
-            # NOTE: these DRI values are calculated values from 10. DRI Mass & Energy Balance
-            self.DRI_composition = {
-                # '10. DRI Mass & Energy Balance'!E73 > '12. EAF Mass & Energy Balance!E13'
-                "Fe": 0.8431916497235140,  # mass fraction Fe
-                # '10. DRI Mass & Energy Balance'!E74 > '12. EAF Mass & Energy Balance!E14'
-                "FeO": 0.06925321488234770,  # mass fraction FeO
-                # '10. DRI Mass & Energy Balance'!E75 > '12. EAF Mass & Energy Balance!E15'
-                "gangue": 0.06755513539413880,  # mass fraction gangue
-                # '10. DRI Mass & Energy Balance'!E76 > '12. EAF Mass & Energy Balance!E16'
-                "C": 0.020,  # mass fraction C
-            }
-
-            self.SiO2_ratio = (
-                1.25  # kg/kg SiO2 to Alumina Ratio in DRI, '12. EAF Mass & Energy Balance!E162'
-            )
-
-        elif self.pellet_grade == "DR":
-            self.DRI_composition = {
-                # '10. DRI Mass & Energy Balance'!E73 > '12. EAF Mass & Energy Balance!E13'
-                "Fe": 0.8431916497235140,  # mass fraction Fe
-                # '10. DRI Mass & Energy Balance'!E74 > '12. EAF Mass & Energy Balance!E14'
-                "FeO": 0.06925321488234770,  # mass fraction FeO
-                # '10. DRI Mass & Energy Balance'!E75 > '12. EAF Mass & Energy Balance!E15'
-                "gangue": 0.06755513539413880,  # mass fraction gangue
-                # '10. DRI Mass & Energy Balance'!E76 > '12. EAF Mass & Energy Balance!E16'
-                "C": 0.020,  # mass fraction C
-            }
-
-            self.SiO2_ratio = (
-                1.25  # kg/kg SiO2 to Alumina Ratio in DRI, '12. EAF Mass & Energy Balance!E162'
-            )
-
-        elif self.pellet_grade == "custom":
-            # check DRI_composition is populated correctly
-            keys = ["Fe", "FeO", "gangue", "C"]
-            for key in keys:
-                if key not in self.DRI_composition:
-                    msg = (
-                        f"The key '{key}' was not found in the 'DRI_composition' "
-                        f"dictionary. Please add the key '{key} to the 'DRI_composition' "
-                        "dictionary and the associated value."
-                    )
-                    raise KeyError(msg)
+            if self.DRI_composition is None:
+                self.DRI_composition = {
+                    "Fe": 0.8431916497235140,
+                    "FeO": 0.06925321488234770,
+                    "gangue": 0.06755513539413880,
+                    "C": 0.020,
+                }
 
             if self.SiO2_ratio is None:
-                msg = "SiO2_ratio cannot be None when using 'custom' for 'pellet_grade'."
-                raise ValueError(msg)
+                self.SiO2_ratio = 1.25
 
-        # hot = 873 K or cold = 298 K, 'Model Inputs & Outputs!B63'
-        if self.DRI_feed_temp == "hot":
-            self.DRI_feed_temperature = 873
-        if self.DRI_feed_temp == "cold":
-            self.DRI_feed_temperature = 298
+        elif self.pellet_grade == "BF":
+            if self.DRI_composition is None:
+                self.DRI_composition = {
+                    "Fe": 0.8019049064951670,
+                    "FeO": 0.06586224237743430,
+                    "gangue": 0.112232851127399000,
+                    "C": 0.020,
+                }
+
+            if self.SiO2_ratio is None:
+                self.SiO2_ratio = 3.0
+
+        elif self.pellet_grade == "custom":
+            if self.DRI_composition is None:
+                raise ValueError("DRI_composition must be provided when pellet_grade='custom'.")
+
+            required_keys = ["Fe", "FeO", "gangue", "C"]
+            for key in required_keys:
+                if key not in self.DRI_composition:
+                    raise KeyError(f"Missing key '{key}' in DRI_composition.")
+
+            if self.SiO2_ratio is None:
+                raise ValueError("SiO2_ratio must be provided when pellet_grade='custom'.")
+
+    # def __attrs__post__init__(self):
+    #     if self.pellet_grade == "DR":
+    #         # NOTE: these DRI values are calculated values from 10. DRI Mass & Energy Balance
+    #         self.DRI_composition = {
+    #             # '10. DRI Mass & Energy Balance'!E73 > '12. EAF Mass & Energy Balance!E13'
+    #             "Fe": 0.8431916497235140,  # mass fraction Fe
+    #             # '10. DRI Mass & Energy Balance'!E74 > '12. EAF Mass & Energy Balance!E14'
+    #             "FeO": 0.06925321488234770,  # mass fraction FeO
+    #             # '10. DRI Mass & Energy Balance'!E75 > '12. EAF Mass & Energy Balance!E15'
+    #             "gangue": 0.06755513539413880,  # mass fraction gangue
+    #             # '10. DRI Mass & Energy Balance'!E76 > '12. EAF Mass & Energy Balance!E16'
+    #             "C": 0.020,  # mass fraction C
+    #         }
+
+    #         self.SiO2_ratio = (
+    #             1.25  # kg/kg SiO2 to Alumina Ratio in DRI, '12. EAF Mass & Energy Balance!E162'
+    #         )
+
+    #     elif self.pellet_grade == "BF":
+    #         self.DRI_composition = {
+    #             # '10. DRI Mass & Energy Balance'!E73 > '12. EAF Mass & Energy Balance!D13'
+    #             "Fe": 0.8019049064951670,  # mass fraction Fe
+    #             # '10. DRI Mass & Energy Balance'!E74 > '12. EAF Mass & Energy Balance!D14'
+    #             "FeO": 0.06586224237743430,  # mass fraction FeO
+    #             # '10. DRI Mass & Energy Balance'!E75 > '12. EAF Mass & Energy Balance!D15'
+    #             "gangue": 0.112232851127399000,  # mass fraction gangue
+    #             # '10. DRI Mass & Energy Balance'!E76 > '12. EAF Mass & Energy Balance!D16'
+    #             "C": 0.020,  # mass fraction C
+    #         }
+
+    #         self.SiO2_ratio = (
+    #             3.0  # kg/kg SiO2 to Alumina Ratio in DRI, '12. EAF Mass & Energy Balance!D162'
+    #         )
+
+    #     elif self.pellet_grade == "custom":
+    #         # check DRI_composition is populated correctly
+    #         keys = ["Fe", "FeO", "gangue", "C"]
+    #         for key in keys:
+    #             if key not in self.DRI_composition:
+    #                 msg = (
+    #                     f"The key '{key}' was not found in the 'DRI_composition' "
+    #                     f"dictionary. Please add the key '{key} to the 'DRI_composition' "
+    #                     "dictionary and the associated value."
+    #                 )
+    #                 raise KeyError(msg)
+
+    #         if self.SiO2_ratio is None:
+    #             msg = "SiO2_ratio cannot be None when using 'custom' for 'pellet_grade'."
+    #             raise ValueError(msg)
+
+    # hot = 873 K or cold = 298 K, 'Model Inputs & Outputs!B63'
+    # if self.DRI_feed_temp == "hot":
+    #     self.DRI_feed_temperature = 873
+    # if self.DRI_feed_temp == "cold":
+    #     self.DRI_feed_temperature = 298
 
 
-class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
+class CMUElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
     def initialize(self):
         super().initialize()
         self.commodity = "steel"
@@ -196,6 +232,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
             "electricity": "kW",
             "natural_gas": "MMBtu/h",
             "electrodes": "kg/h",
+            "sponge_iron": "t/h",
             "scrap": "t/h",
             "coal": "t/h",
             "doloma": "t/h",
@@ -252,14 +289,6 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         )
 
         self.add_output(
-            "mass_Fe_from_scrap",
-            val=0.0,
-            shape=n_timesteps,
-            units="kg",
-            desc="Total unit of Fe from scrap",
-        )
-
-        self.add_output(
             "mass_steel_per_unit_dri",
             val=0.0,
             shape=n_timesteps,
@@ -269,7 +298,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
 
     def compute(self, inputs, outputs):
         # calculate energy mass balance on a per ton liquid steel basis
-        energy_mass_per_tonne = self.energy_mass_balance_per_unit()
+        energy_mass_per_tonne = self.energy_mass_balance_per_unit(inputs)
 
         annual_steel_production = inputs["annual_production"]  # t/year
         # t/h, convert annual production to hourly production for
@@ -283,6 +312,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
             "electricity": energy_mass_per_tonne["electricity_per_tLS"],  # kWh/t
             "natural_gas": energy_mass_per_tonne["natural_gas_per_tLS"],  # MMBtu/t
             "electrodes": energy_mass_per_tonne["electrodes_per_tLS"],  # kg/t
+            "sponge_iron": energy_mass_per_tonne["mass_DRI_per_tLS"],  # t/t
             "scrap": energy_mass_per_tonne["mass_scrap_per_tLS"],  # t/t
             "coal": energy_mass_per_tonne["coal_per_tLS"],  # t/t
             "doloma": energy_mass_per_tonne["burnt_doloma_per_tLS"],  # t/t
@@ -344,11 +374,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         # Total kg Fe consumed to produce FeO
         outputs["mass_Fe_to_FeO"] = energy_mass_per_tonne["mass_Fe_to_FeO_tLS"] * steel_production
         # Total kg Fe from scrap
-        outputs["mass_Fe_from_scrap"] = (
-            energy_mass_per_tonne["mass_Fe_scrap_per_tLS"] * steel_production
-        )
-        # Total kg Steel formed from scrap per ton scrap
-        outputs["mass_steel_per_unit_dri"] = energy_mass_per_tonne["mass_steel_per_tdri"]
+        outputs["mass_steel_per_unit_dri"] = energy_mass_per_tonne["mass_steel_per_tDRI"]
 
     def energy_mass_balance_per_unit(self, inputs):
         """Computes the energy and mass balance for the EAF fed with dri and scrap on a
@@ -360,21 +386,27 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
                 - mass_MgO_slag_per_tDRI (kg/t): Mass of MgO in slag per ton of DRI.
                 - mass_FeO_slag_per_tDRI (kg/t): Mass of FeO in slag per ton of DRI.
                 - mass_Fe_to_FeO_per_tDRI (kg/t): Mass of Fe consumed to produce FeO per ton DRI.
+                - mass_Fe_scrap_per_tDRI (kg/t): Mass of Fe from scrap per ton of DRI.
                 - mass_Fe_DRI_per_tDRI (kg/t): Mass of Fe from DRI per ton of DRI.
                 - mass_steel_per_tDRI (kg/t): Mass of steel formed from scrap per ton of DRI.
                 - natural_gas_per_tLS (MMBtu/t): Natural gas usage per ton of liquid steel.
                 - electrodes_per_tLS (kg/t): Electrode usage per ton of liquid steel.
+                - mass_DRI_per_tLS (t/t): Mass of DRI per ton of liquid steel.
                 - mass_scrap_per_tLS (t/t): Mass of scrap per ton of liquid steel.
                 - mass_gangue_per_tLS (kg/t): Mass of gangue per ton of liquid steel.
                 - mass_slag_per_tLS (kg/t): Mass of slag per ton of liquid steel.
                 - mass_MgO_slag_per_tLS (kg/t): Mass of MgO in slag per ton of liquid steel.
                 - mass_FeO_slag_per_tLS (kg/t): Mass of FeO in slag per ton of liquid steel.
+                - mass_Fe_to_FeO_per_tLS (kg/t): Mass of Fe consumed to produce FeO per ton
+                    of liquid steel.
+                - mass_CO_injected_per_tLS (kg/t): Mass of CO injected per ton of liquid steel.
                 - coal_per_tLS (t/t): Mass of coal per ton of liquid steel.
                 - oxygen_per_tLS (Nm^3/t): Normal cubic meters of oxygen per ton of liquid steel.
                 - burnt_doloma_per_tLS (t/t): Mass of burnt doloma per ton of liquid steel.
                 - burnt_lime_per_tLS (t/t): Mass of burnt lime per ton of liquid steel.
                 - mass_flux_per_tLS (kg/t): Mass of flux (lime and doloma) per ton of liquid steel.
-                - EAF_scrap_heat_loss_pct (%): Percentage of heat loss in EAF with scrap-only case.
+                - off_gas_CO_kg (kg/t): Mass of CO in off-gas per ton of liquid steel.
+                - EAF_DRI_heat_loss_pct (%): Percentage of heat loss in EAF.
                 - electricity_per_tLS (kWh/t): Total electricity consumption per ton of liquid
                     steel for EAF with scrap-only case, including heat loss adjustment.
 
@@ -482,7 +514,8 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
 
         # kg Fe from DRI per tDRI, '12. EAF Mass & Energy Balance!D189'
         output_dict["mass_Fe_DRI_per_tDRI"] = (
-            mass_basis_DRI * self.config.DRI_composition["Fe"] - output_dict["mass_Fe_to_FeO"]
+            mass_basis_DRI * self.config.DRI_composition["Fe"]
+            - output_dict["mass_Fe_to_FeO_per_tDRI"]
         )
         # kg Fe from scrap per tDRI, '12. EAF Mass & Energy Balance!D190'
         output_dict["mass_Fe_scrap_per_tDRI"] = mass_scrap_from_basis * scrap_composition["Fe"]
@@ -496,17 +529,16 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         ###### forward mass calculation on a per tonne of liquid steel basis #################
         # NOTE: calculated per ton liquid steel (tLS)
         # kg DRI per tLS, '12. EAF Mass & Energy Balance!D195'
-        output_dict["mass_DRI_per_tLS"] = (
-            mass_basis_DRI / output_dict["mass_steel_per_tDRI"]
-        ) * 1000
-        # kg scrap per tLS, '12. EAF Mass & Energy Balance!D196'
-        output_dict["mass_scrap_per_tLS"] = (
-            mass_scrap_from_basis / output_dict["mass_steel_per_tDRI"]
-        ) * 1000
+        mass_DRI_per_tLS = (mass_basis_DRI / output_dict["mass_steel_per_tDRI"]) * 1000
+        # kg scrap per ton LS, '12. EAF Mass & Energy Balance!D69'
+        output_dict["mass_DRI_per_tLS"] = units.convert_units(mass_DRI_per_tLS, "kg", "t")
 
+        # kg scrap per tLS, '12. EAF Mass & Energy Balance!D196'
+        mass_scrap_per_tLS = (mass_scrap_from_basis / output_dict["mass_steel_per_tDRI"]) * 1000
+        output_dict["mass_scrap_per_tLS"] = units.convert_units(mass_scrap_per_tLS, "kg", "t")
         # kg gangue per tLS from DRI, '12. EAF Mass & Energy Balance!D198'
         output_dict["mass_gangue_per_tLS"] = (
-            output_dict["mass_DRI_per_tLS"] * self.config.DRI_composition["gangue"]
+            mass_DRI_per_tLS * self.config.DRI_composition["gangue"]
         )
         # kg/kg SiO2 to Alumina Ratio in DRI,
         # '12. EAF Mass & Energy Balance!D199' > '12. EAF Mass & Energy Balance!D162'
@@ -514,7 +546,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         # kg SiO2 per tLS from DRI, '12. EAF Mass & Energy Balance!D200'
         mass_SiO2_DRI_per_tLS = (output_dict["mass_gangue_per_tLS"] * SiO2_ratio) / (SiO2_ratio + 1)
         # kg SiO2 per tLS from scrap, '12. EAF Mass & Energy Balance!D201'
-        mass_SiO2_scrap_per_tLS = output_dict["mass_scrap_per_tLS"] * mass_pct_SiO2_scrap
+        mass_SiO2_scrap_per_tLS = mass_scrap_per_tLS * mass_pct_SiO2_scrap
         # kg Al2O3 per tLS from DRI, '12. EAF Mass & Energy Balance!D202'
         mass_Al2O3_per_tLS = output_dict["mass_gangue_per_tLS"] / (SiO2_ratio + 1)
 
@@ -536,7 +568,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         output_dict["mass_FeO_slag_per_tLS"] = pct_FeO_slag * output_dict["mass_slag_per_tLS"]
 
         # kg FeO from DRI per tLS, '12. EAF Mass & Energy Balance!D215'
-        mass_FeO_DRI_per_tLS = output_dict["mass_DRI_per_tLS"] * self.config.DRI_composition["FeO"]
+        mass_FeO_DRI_per_tLS = mass_DRI_per_tLS * self.config.DRI_composition["FeO"]
 
         # kmol FeO from DRI per tLS, '12. EAF Mass & Energy Balance!D216'
         mole_FeO_DRI_per_tLS = mass_FeO_DRI_per_tLS / FEO_MW
@@ -547,7 +579,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         # kmol Fe consumed to produce FeO per tLS, '12. EAF Mass & Energy Balance!D219'
         moles_Fe_to_FeO_tLS = add_moles_FeO_needed_tLS
         # kg Fe consumed to produce FeO per tLS, '12. EAF Mass & Energy Balance!D220'
-        moles_Fe_to_FeO_tLS * FE_MW
+        output_dict["mass_Fe_to_FeO_tLS"] = moles_Fe_to_FeO_tLS * FE_MW
 
         # kmol O2 consumed to produce FeO per tLS, '12. EAF Mass & Energy Balance!D221'
         moles_O2_to_FeO_tLS = moles_Fe_to_FeO_tLS * 0.5  # TODO: where's this value from
@@ -555,7 +587,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         # kg Carbon in Steel per tLS, '12. EAF Mass & Energy Balance!D223'
         mass_C_steel_per_tLS = mass_steel_stream * pct_carbon_steel
         # kg Carbon in DRI per tLS, '12. EAF Mass & Energy Balance!D224'
-        mass_C_DRI_per_tLS = output_dict["mass_DRI_per_tLS"] * self.config.DRI_composition["C"]
+        mass_C_DRI_per_tLS = mass_DRI_per_tLS * self.config.DRI_composition["C"]
         natural_gas_MJ = units.convert_units(output_dict["natural_gas_per_tLS"], "MMBtu", "MJ")
         # kg Carbon in natural gas per tLS, '12. EAF Mass & Energy Balance!D225'
         mass_C_ng_per_tLS = natural_gas_MJ / LHV_CH4_MJ_PER_KG * C_MW / CH4_MW
@@ -570,6 +602,12 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
             mass_injected_carbon_per_tLS = total_C_kg_per_tLS - mass_C_DRI_per_tLS
         else:
             mass_injected_carbon_per_tLS = 0
+        # ton, assume 0.806 tonC/tonCoal,
+        # '5. Electric Arc Furnace!C35' > '12. EAF Mass & Energy Balance!D228/0.806/1000'
+        # TODO: hardcoded value?
+        output_dict["coal_per_tLS"] = units.convert_units(
+            mass_injected_carbon_per_tLS / 0.806, "kg", "t"
+        )
         # kmol Carbon in NG blown out per tLS, '12. EAF Mass & Energy Balance!D229'
         moles_C_ng_per_tLS = mass_C_ng_per_tLS / C_MW
         # kmol Oxygen needed to blow out NG per tLS,
@@ -581,7 +619,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         moles_CO2_ng_per_tLS = moles_C_ng_per_tLS * 1
 
         # kg CO2 formed from NG, '12. EAF Mass & Energy Balance!D232'
-        output_dict["mass_CO_injected_per_tLS"] = moles_CO2_ng_per_tLS * CO2_MW
+        output_dict["mass_CO_injected_per_tLS"] = moles_CO2_ng_per_tLS * CO_MW
         # kmol Carbon in DRI blown out per tLS,
         # '12. EAF Mass & Energy Balance!D233', assume remaining C originated in DRI
         moles_C_DRI_per_tLS = (mass_C_DRI_per_tLS - mass_C_steel_per_tLS) / C_MW
@@ -612,7 +650,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
             + moles_O2_DRI_per_tLS
         )
         # Nm^3 O2 required per tLS, '12. EAF Mass & Energy Balance!D242' (ideal gas law)
-        (moles_O2_per_tLS * 8.314 * 273.15) / 101.325
+        output_dict["oxygen_per_tLS"] = (moles_O2_per_tLS * 8.314 * 273.15) / 101.325
 
         # Electric Arc Furnace (EAF) Fed with DRI Directly (No ESF) - Flux Addition
         # (kg/kg), '12. EAF Mass & Energy Balance!D254'
@@ -623,9 +661,11 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         mass_CaO_doloma = mass_MgO_doloma * CaO_MgO_ratio
         # (kg/tLS), '12. EAF Mass & Energy Balance!D257'
         mass_doloma = mass_MgO_doloma + mass_CaO_doloma
+        # ton, '5. Electric Arc Furnace!C36' > '12. EAF Mass & Energy Balance!D257/1000'
         output_dict["burnt_doloma_per_tLS"] = units.convert_units(mass_doloma, "kg", "t")
         # (kg/tLS), '12. EAF Mass & Energy Balance!D258'
         mass_lime = mass_CaO_slag_per_tLS - mass_CaO_doloma
+        # ton, '5. Electric Arc Furnace!C37' > '12. EAF Mass & Energy Balance!D258/1000'
         output_dict["burnt_lime_per_tLS"] = units.convert_units(mass_lime, "kg", "t")
         # (kg/tLS), '12. EAF Mass & Energy Balance!D259'
         output_dict["mass_flux_per_tLS"] = mass_doloma + mass_lime
@@ -671,7 +711,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
             DRI_Al2O3_J_mol = -1.675711853668660e06
 
         # kg Fe BF pellets, '12. EAF Mass & Energy Balance!F264'
-        DRI_Fe_kg = output_dict["mass_DRI_per_tLS"] * self.config.DRI_composition["Fe"]
+        DRI_Fe_kg = mass_DRI_per_tLS * self.config.DRI_composition["Fe"]
         # kmol Fe BF pellets, '12. EAF Mass & Energy Balance!E264'
         DRI_Fe_n_kmol = DRI_Fe_kg / FE_MW
         # kJ Fe BF pellets, '12. EAF Mass & Energy Balance!G264'
@@ -718,7 +758,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         # H (J/mol) Fe, '12. EAF Mass & Energy Balance!D269' > '14. Enthalpy Calculations!C113'
         scrap_Fe_J_mol = 0.0
         # kg Fe, '12. EAF Mass & Energy Balance!F269'
-        scrap_Fe_kg = output_dict["mass_scrap_per_tLS"] * scrap_composition["Fe"]
+        scrap_Fe_kg = mass_scrap_per_tLS * scrap_composition["Fe"]
         # kmol Fe, '12. EAF Mass & Energy Balance!E269'
         scrap_Fe_n_kmol = scrap_Fe_kg / FE_MW
         # kJ Fe, '12. EAF Mass & Energy Balance!G269'
@@ -826,27 +866,22 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         # kg MgO in slag product,
         # '12. EAF Mass & Energy Balance!F285' > '12. EAF Mass & Energy Balance!D212'
         slag_MgO_kg = output_dict["mass_MgO_slag_per_tLS"]
-        # H (MJ/kg) BF grade pellets estimated enthalpy of liquid slag (Bjorkvall approach),
-        # '14. Enthalpy Calculations!J14'
-        BF_pellets_MJ_kg = -8.377283654515320e00
-        # H (MJ/kg) BF grade pellets estimated enthalpy of liquid slag (Bjorkvall approach),
-        # '14. Enthalpy Calculations!J14'
-        DR_pellets_MJ_kg = -8.382019633585080e00
 
         if self.config.pellet_grade == "BF":
-            slag_total_kJ = units.convert_units(
-                BF_pellets_MJ_kg
-                * (slag_FeO_kg + slag_SiO2_kg + slag_Al2O3_kg + slag_CaO_kg + slag_MgO_kg),
-                "MJ",
-                "kJ",
-            )
+            # H (MJ/kg) BF grade pellets estimated enthalpy of liquid slag (Bjorkvall approach),
+            # '14. Enthalpy Calculations!J14'
+            pellets_MJ_kg = -8.377283654515320e00
         if self.config.pellet_grade == "DR":
-            slag_total_kJ = units.convert_units(
-                DR_pellets_MJ_kg
-                * (slag_FeO_kg + slag_SiO2_kg + slag_Al2O3_kg + slag_CaO_kg + slag_MgO_kg),
-                "MJ",
-                "kJ",
-            )
+            # H (MJ/kg) BF grade pellets estimated enthalpy of liquid slag (Bjorkvall approach),
+            # '14. Enthalpy Calculations!J14'
+            pellets_MJ_kg = -8.382019633585080e00
+
+        slag_total_kJ = units.convert_units(
+            pellets_MJ_kg
+            * (slag_FeO_kg + slag_SiO2_kg + slag_Al2O3_kg + slag_CaO_kg + slag_MgO_kg),
+            "MJ",
+            "kJ",
+        )
 
         # H (J/mol) CO in off-gas product,
         # '12. EAF Mass & Energy Balance!D286' > '14. Enthalpy Calculations!C322'
@@ -876,7 +911,7 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         EAF_DRI_energy_consumption_kJ_tHM = total_EAF_DRI_products_kJ - total_EAF_DRI_inputs_kJ
         # (kWh/tHM) Energy Consumption of EAF, '12. EAF Mass & Energy Balance!G291'
         EAF_DRI_energy_consumption_kWh_tHM = units.convert_units(
-            EAF_DRI_energy_consumption_kJ_tHM, "kW*h", "kJ"
+            EAF_DRI_energy_consumption_kJ_tHM, "kJ", "kW*h"
         )
 
         # NOTE EAF_scarp_heat_loss_adjustment_abs comes from EAF scrap only performance model
@@ -897,29 +932,8 @@ class ElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
         )
         # (kWh/tHM) Total EAF with scrap energy consumption with heat loss adjustment,
         # '12. EAF Mass & Energy Balance!G295'
-        (EAF_DRI_energy_consumption_kWh_tHM + EAF_DRI_heat_loss_adjustment_abs)
+        output_dict["electricity_per_tLS"] = (
+            EAF_DRI_energy_consumption_kWh_tHM + EAF_DRI_heat_loss_adjustment_abs
+        )
 
-        # 5. Electric Arc Furnace > Including DRI in Feed
-        # Electric Arc Furnace (EAF) with DRI process Inputs (Feedstocks)
-        if self.config.pellet_grade == "BF":
-            # Nm^3 O2/ton Steel,
-            # '12. EAF Mass & Energy Balance!D242' > '5. Electric Arc Furnace!C30'
-            # kWh/ton Hot Metal / Liquid Steel?,
-            # '12. EAF Mass & Energy Balance!G296' >'5. Electric Arc Furnace!C31'
-            # ton, '5. Electric Arc Furnace!C34' > '12. EAF Mass & Energy Balance!D196/1000'
-            units.convert_units(output_dict["mass_scrap_per_tLS"], "kg", "t")
-            # ton, assume 0.806 tonC/tonCoal,
-            # '5. Electric Arc Furnace!C35' > '12. EAF Mass & Energy Balance!D228/0.806/1000'
-            # TODO: hardcoded value?
-            output_dict["coal_per_tLS"] = units.convert_units(
-                mass_injected_carbon_per_tLS / 0.806, "kg", "t"
-            )
-            # ton, '5. Electric Arc Furnace!C36' > '12. EAF Mass & Energy Balance!D257/1000'
-            output_dict["burnt_doloma_per_tLS"] = units.convert_units(mass_doloma, "kg", "t")
-            # ton, '5. Electric Arc Furnace!C37' > '12. EAF Mass & Energy Balance!D258/1000'
-            output_dict["burnt_lime_per_tLS"] = units.convert_units(mass_lime, "kg", "t")
-
-        # TODO: update with calculations from mass balance for DR pellets
-        if self.config.pellet_grade == "DR":
-            pass
         return output_dict

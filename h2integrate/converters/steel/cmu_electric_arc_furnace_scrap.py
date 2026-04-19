@@ -491,12 +491,9 @@ class CMUElectricArcFurnaceScrapOnlyPerformanceComponent(PerformanceModelBaseCla
         moles_CO_injected_per_tLS * CO_MW
         # kmol O2 required per tLS, '12. EAF Mass & Energy Balance!D100'
         moles_O2_per_tLS = moles_O2_ng_per_tLS + moles_O2_injected_per_tLS + moles_O2_to_FeO_tLS
-        # Nm^3 O2 required per tLS, '12. EAF Mass & Energy Balance!D101'
-        nm3_O2_per_tLS = (moles_O2_per_tLS * 8.314 * 273.15) / 101.325
-
-        # Nm^3 O2/ton Steel,
+        # Nm^3 O2 required per tLS,
         # '12. EAF Mass & Energy Balance!D101' > '5. Electric Arc Furnace!C5'
-        output_dict["oxygen_per_tLS"] = nm3_O2_per_tLS
+        output_dict["oxygen_per_tLS"] = (moles_O2_per_tLS * 8.314 * 273.15) / 101.325
 
         # Electric Arc Furnace (EAF) Fed with Scrap - Flux Addition
         # (kg/kg), '12. EAF Mass & Energy Balance!D113'
