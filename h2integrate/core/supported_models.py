@@ -18,6 +18,7 @@ from h2integrate.finances.numpy_financial_npv import NumpyFinancialNPV
 from h2integrate.resource.wind.openmeteo_wind import OpenMeteoHistoricalWindResource
 from h2integrate.storage.generic_storage_cost import GenericStorageCostModel
 from h2integrate.storage.hydrogen.mch_storage import MCHTOLStorageCostModel
+from h2integrate.converters.steel.cmu_eaf_cost import CMUElectricArcFurnaceCostModel
 from h2integrate.converters.wind.atb_wind_cost import ATBWindPlantCostModel
 from h2integrate.storage.battery.pysam_battery import PySAMBatteryPerformanceModel
 from h2integrate.transporters.generic_combiner import GenericCombinerPerformanceModel
@@ -116,6 +117,12 @@ from h2integrate.resource.solar.nlr_developer_goes_api_models import (
     GOESConusSolarAPI,
     GOESFullDiscSolarAPI,
     GOESAggregatedSolarAPI,
+)
+from h2integrate.converters.steel.cmu_electric_arc_furnace_dri import (
+    CMUElectricArcFurnaceDRIPerformanceComponent,
+)
+from h2integrate.converters.steel.cmu_electric_arc_furnace_scrap import (
+    CMUElectricArcFurnaceScrapOnlyPerformanceComponent,
 )
 from h2integrate.converters.water_power.hydro_plant_run_of_river import (
     RunOfRiverHydroCostModel,
@@ -227,6 +234,11 @@ supported_models = {
     "NaturalGasEAFPlantCostComponent": NaturalGasEAFPlantCostComponent,  # standalone model
     "HydrogenEAFPlantPerformanceComponent": HydrogenEAFPlantPerformanceComponent,
     "HydrogenEAFPlantCostComponent": HydrogenEAFPlantCostComponent,  # standalone model
+    "CMUElectricArcFurnaceScrapOnlyPerformanceComponent": (
+        CMUElectricArcFurnaceScrapOnlyPerformanceComponent
+    ),
+    "CMUElectricArcFurnaceDRIPerformanceComponent": CMUElectricArcFurnaceDRIPerformanceComponent,
+    "CMUElectricArcFurnaceCostModel": CMUElectricArcFurnaceCostModel,
     "ReverseOsmosisPerformanceModel": ReverseOsmosisPerformanceModel,
     "ReverseOsmosisCostModel": ReverseOsmosisCostModel,
     "SimpleAmmoniaPerformanceModel": SimpleAmmoniaPerformanceModel,

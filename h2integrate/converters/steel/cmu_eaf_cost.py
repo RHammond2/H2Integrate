@@ -1,0 +1,109 @@
+from attrs import field, define
+
+from h2integrate.core.utilities import merge_shared_inputs
+from h2integrate.core.validators import must_equal
+from h2integrate.core.model_baseclasses import CostModelBaseClass, CostModelBaseConfig
+
+
+@define(kw_only=True)
+class CMUElectricArcFurnaceCostConfig(CostModelBaseConfig):
+    """Configuration class for the CMUElectricArcFurnaceCostModel.
+
+    Args:
+        maintenance_cost_rate (float): Fraction of capital expenditure allocated to annual
+            maintenance and operations costs.
+            Default value is 0.045, which corresponds to 4.5% of CapEx allocated to annual
+            maintenance and operations costs according to the CMU decarbSTEEL v5 model.
+        mean_annual_wage (float): Mean annual wage for steel workers, used to calculate labor costs.
+            Default value is 66173, which corresponds to the mean annual wage for steel workers in
+            the US in 2022 according to the Bureau of Labor Statistics.
+        mean_hourly_wage (float): Mean hourly wage for steel workers, used to calculate labor costs.
+            Default value is 31.82, which corresponds to the mean hourly wage for steel workers
+            in the US in 2022 according to the Bureau of Labor Statistics.
+        eaf_labor_required_per_tLS (float): Person hours required per ton of liquid steel produced
+            in an electric arc furnace, used to calculate labor costs. Default value is 4/20.
+        cost_year (int): Year for which the cost data is reported, used for inflation adjustments.
+            Default value is 2022, which corresponds to the year of the cost data used in the CMU
+                decarbSTEEL v5 model.
+
+    """
+
+    # fraction of capex for O&M (x100 = %), 'Model Inputs & Outputs!B3'
+    maintenance_cost_rate: float = field(default=0.045)
+    # $ mean annual wage steel worker, 'Model Inputs & Outputs!B4'
+    mean_annual_wage: float = field(default=66173)
+    # $ mean hourly wage steel worker, 'Model Inputs & Outputs!B5'
+    mean_hourly_wage: float = field(default=31.82)
+    # person hours per ton steel, '6. Production Cost!B43' > '6. Production Cost!J73'
+    eaf_labor_required_per_tLS: float = field(default=4 / 20)
+    cost_year: int = field(default=2022, converter=int, validator=must_equal(2022))
+
+
+class CMUElectricArcFurnaceCostModel(CostModelBaseClass):
+    """
+    OpenMDAO component for calculating electric arc furnace capital and operating
+    expenditures based on the CMU decarbSTEEL v5 model.
+
+
+    Inputs:
+        rated_steel_production (float):
+            Rated capacity of the electric arc furnace.
+
+    Outputs:
+        CapEx (float):
+            Total capital expenditure of the EAF.
+        OpEx (float):
+            Annual operating expenditure of the EAF.
+    """
+
+    _time_step_bounds = (
+        3600,
+        3600,
+    )  # (min, max) time step lengths (in seconds) compatible with this model
+
+    def setup(self):
+        self.config = CMUElectricArcFurnaceCostConfig.from_dict(
+            merge_shared_inputs(self.options["tech_config"]["model_inputs"], "cost"),
+            additional_cls_name=self.__class__.__name__,
+        )
+        super().setup()
+
+        self.add_input(
+            "rated_steel_production",
+            val=0.0,
+            units="t/year",
+            desc="Electric arc furnace rated capacity",
+        )
+
+    def compute(self, inputs, outputs, discrete_inputs, discrete_outputs):
+        # 6. Production Cost
+        # > CAPEX Production Assumptions
+        # tons steel/year, '6. Production Cost!C26'
+        annual_capacity = inputs["rated_steel_production"]
+        CEPCI_index_2022 = 816  # CE Index (2022), '6. Production Cost!D26'
+
+        # > Financial Conversion
+        # CE Index (original year 2018), '6. Production Cost!F114' > '6. Production Cost!E151'
+        CEPCI_index_2018 = 603.1
+        # USD conversion for 2018, '6. Production Cost!D151'
+        USD_financial_conversion_2018 = 1.180185
+
+        # > CAPEX by Technology Lookup Table
+        # $/ton steel capacity annually, EAF (mid) '6. Production Cost!C114'
+        reported_levelized_capex = 184 * USD_financial_conversion_2018
+        # $/ton steel capacity annually, EAF (mid) '6. Production Cost!G114' (capex_tpa)
+        inflation_adjusted_levelized_capex = (
+            reported_levelized_capex * CEPCI_index_2022 / CEPCI_index_2018
+        )
+        # > CAPEX by pathway node
+        # $, '6. Production Cost!F73'
+        outputs["CapEx"] = inflation_adjusted_levelized_capex * annual_capacity
+
+        # > Labor by pathway node
+        # $/ton liquid steel, '6. Production Cost!K73'
+        labor_cost_per_tLS = self.config.eaf_labor_required_per_tLS * self.config.mean_hourly_wage
+
+        # Not in CMU model
+        labor_cost = labor_cost_per_tLS * annual_capacity  # $
+        maintenance_cost = self.config.maintenance_cost_rate * outputs["CapEx"]  # $
+        outputs["OpEx"] = labor_cost + maintenance_cost  # $
