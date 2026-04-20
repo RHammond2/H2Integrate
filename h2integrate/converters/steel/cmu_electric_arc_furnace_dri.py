@@ -126,62 +126,6 @@ class CMUElectricArcFurnaceDRIPerformanceConfig(BaseConfig):
             if self.SiO2_ratio is None:
                 raise ValueError("SiO2_ratio must be provided when pellet_grade='custom'.")
 
-    # def __attrs__post__init__(self):
-    #     if self.pellet_grade == "DR":
-    #         # NOTE: these DRI values are calculated values from 10. DRI Mass & Energy Balance
-    #         self.DRI_composition = {
-    #             # '10. DRI Mass & Energy Balance'!E73 > '12. EAF Mass & Energy Balance!E13'
-    #             "Fe": 0.8431916497235140,  # mass fraction Fe
-    #             # '10. DRI Mass & Energy Balance'!E74 > '12. EAF Mass & Energy Balance!E14'
-    #             "FeO": 0.06925321488234770,  # mass fraction FeO
-    #             # '10. DRI Mass & Energy Balance'!E75 > '12. EAF Mass & Energy Balance!E15'
-    #             "gangue": 0.06755513539413880,  # mass fraction gangue
-    #             # '10. DRI Mass & Energy Balance'!E76 > '12. EAF Mass & Energy Balance!E16'
-    #             "C": 0.020,  # mass fraction C
-    #         }
-
-    #         self.SiO2_ratio = (
-    #             1.25  # kg/kg SiO2 to Alumina Ratio in DRI, '12. EAF Mass & Energy Balance!E162'
-    #         )
-
-    #     elif self.pellet_grade == "BF":
-    #         self.DRI_composition = {
-    #             # '10. DRI Mass & Energy Balance'!E73 > '12. EAF Mass & Energy Balance!D13'
-    #             "Fe": 0.8019049064951670,  # mass fraction Fe
-    #             # '10. DRI Mass & Energy Balance'!E74 > '12. EAF Mass & Energy Balance!D14'
-    #             "FeO": 0.06586224237743430,  # mass fraction FeO
-    #             # '10. DRI Mass & Energy Balance'!E75 > '12. EAF Mass & Energy Balance!D15'
-    #             "gangue": 0.112232851127399000,  # mass fraction gangue
-    #             # '10. DRI Mass & Energy Balance'!E76 > '12. EAF Mass & Energy Balance!D16'
-    #             "C": 0.020,  # mass fraction C
-    #         }
-
-    #         self.SiO2_ratio = (
-    #             3.0  # kg/kg SiO2 to Alumina Ratio in DRI, '12. EAF Mass & Energy Balance!D162'
-    #         )
-
-    #     elif self.pellet_grade == "custom":
-    #         # check DRI_composition is populated correctly
-    #         keys = ["Fe", "FeO", "gangue", "C"]
-    #         for key in keys:
-    #             if key not in self.DRI_composition:
-    #                 msg = (
-    #                     f"The key '{key}' was not found in the 'DRI_composition' "
-    #                     f"dictionary. Please add the key '{key} to the 'DRI_composition' "
-    #                     "dictionary and the associated value."
-    #                 )
-    #                 raise KeyError(msg)
-
-    #         if self.SiO2_ratio is None:
-    #             msg = "SiO2_ratio cannot be None when using 'custom' for 'pellet_grade'."
-    #             raise ValueError(msg)
-
-    # hot = 873 K or cold = 298 K, 'Model Inputs & Outputs!B63'
-    # if self.DRI_feed_temp == "hot":
-    #     self.DRI_feed_temperature = 873
-    # if self.DRI_feed_temp == "cold":
-    #     self.DRI_feed_temperature = 298
-
 
 class CMUElectricArcFurnaceDRIPerformanceComponent(PerformanceModelBaseClass):
     def initialize(self):
