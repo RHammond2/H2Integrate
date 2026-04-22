@@ -133,24 +133,24 @@ def test_energy_mass_balance_per_unit(
     prob.run_model()
 
     with subtests.test("kg_slag"):
-        assert pytest.approx(sum(prob.get_val("slag_out")), rel=1e-6) == 46.30390896654156
+        assert pytest.approx(sum(prob.get_val("slag_out")), rel=1e-6) == 46.30399113656538
 
     with subtests.test("kg_MGO_in_slag"):
-        assert pytest.approx(sum(prob.get_val("mass_MgO_slag")), rel=1e-6) == 5.556469075984987
+        assert pytest.approx(sum(prob.get_val("mass_MgO_slag")), rel=1e-6) == 5.556478936388529
 
     with subtests.test("kg_FeO_in_slag"):
-        assert pytest.approx(sum(prob.get_val("mass_FeO_slag")), rel=1e-6) == 13.891172689962469
+        assert pytest.approx(sum(prob.get_val("mass_FeO_slag")), rel=1e-6) == 13.891197340972685
 
     with subtests.test("mass_Fe_from_scrap"):
         assert pytest.approx(sum(prob.get_val("mass_Fe_from_scrap")), rel=1e-6) == 999
 
     with subtests.test("mass_steel_per_unit_scrap"):
         assert (
-            pytest.approx(prob.get_val("mass_steel_per_unit_scrap"), rel=1e-6) == 930.8814145045054
+            pytest.approx(prob.get_val("mass_steel_per_unit_scrap"), rel=1e-6) == 930.8794677884603
         )
 
     with subtests.test("oxygen_consumed"):
-        assert pytest.approx(sum(prob.get_val("oxygen_consumed")), rel=1e-6) == 42.25579577215943
+        assert pytest.approx(sum(prob.get_val("oxygen_consumed")), rel=1e-6) == 42.197236934381564
 
     with subtests.test("electricity_consumed"):
         assert pytest.approx(sum(prob.get_val("electricity_consumed")), rel=1e-6) == 470.0
@@ -162,18 +162,18 @@ def test_energy_mass_balance_per_unit(
         assert pytest.approx(sum(prob.get_val("electrodes_consumed")), rel=1e-6) == 2.0
 
     with subtests.test("scrap_consumed"):
-        assert pytest.approx(sum(prob.get_val("scrap_consumed")), rel=1e-6) == 1.0742506880237643
+        assert pytest.approx(sum(prob.get_val("scrap_consumed")), rel=1e-6) == 1.0742525943685
 
     with subtests.test("coal_consumed"):
         assert pytest.approx(sum(prob.get_val("coal_consumed")), rel=1e-6) == 0.03722084367245657
 
     with subtests.test("doloma_consumed"):
-        assert pytest.approx(sum(prob.get_val("doloma_consumed")), rel=1e-6) == 0.01333552578236397
+        assert pytest.approx(sum(prob.get_val("doloma_consumed")), rel=1e-6) == 0.013335549447331245
 
     with subtests.test("lime_consumed"):
         assert (
             pytest.approx(sum(prob.get_val("lime_consumed", units="t/h")), rel=1e-6)
-            == 0.008334703613977486
+            == 0.008334718404582999
         )
 
 
@@ -218,3 +218,29 @@ def test_scrap_EAF_performance(steel_config, plant_config, feedstock_availabilit
 
     with subtests.test("capacity_factor"):
         assert pytest.approx(prob.get_val("capacity_factor"), rel=1e-6) == 1.0
+
+
+@pytest.mark.unit
+def test_cmu_eaf_error(steel_config, plant_config, feedstock_availability_costs, subtests):
+    prob = om.Problem()
+
+    perf = CMUElectricArcFurnaceScrapOnlyPerformanceComponent(
+        plant_config=plant_config, tech_config=steel_config, driver_config={}
+    )
+
+    prob.model.add_subsystem("perf", perf, promotes=["*"])
+    prob.setup()
+
+    prob.set_val("annual_production", 3000000, units="t/year")
+
+    for feedstock_name, feedstock_info in feedstock_availability_costs.items():
+        prob.set_val(
+            f"perf.{feedstock_name}_in",
+            feedstock_info["rated_capacity"],
+            units=feedstock_info["units"],
+        )
+
+    with pytest.raises(
+        ValueError, match="Rated steel production .* cannot exceed rated steel capacity .*"
+    ):
+        prob.run_model()
