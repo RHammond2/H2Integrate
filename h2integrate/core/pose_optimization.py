@@ -3,13 +3,12 @@ This file is based on the WISDEM file of the same name: https://github.com/NLRWi
 and also based off of the H2Integrate file of the same name originally adapted by Jared Thomas.
 """
 
-import re
 import warnings
 from pathlib import Path
 
 import openmdao.api as om
 
-from h2integrate.core.file_utils import check_file_format_for_csv_generator
+from h2integrate.core.file_utils import make_unique_case_name, check_file_format_for_csv_generator
 
 
 class PoseOptimization:
@@ -51,16 +50,10 @@ class PoseOptimization:
         # Determine the number of design variables
         n_DV = 0
 
-        if self.config["design_variables"]["electrolyzer_rating_kw"]["flag"]:
-            n_DV += 1
-        if self.config["design_variables"]["pv_capacity_kw"]["flag"]:
-            n_DV += 1
-        if self.config["design_variables"]["wave_capacity_kw"]["flag"]:
-            n_DV += 1
-        if self.config["design_variables"]["battery_capacity_kw"]["flag"]:
-            n_DV += 1
-        if self.config["design_variables"]["battery_capacity_kwh"]["flag"]:
-            n_DV += 1
+        for tech_dvars in self.config["design_variables"].values():
+            for dvar_params in tech_dvars.values():
+                if dvar_params.get("flag", False):
+                    n_DV += 1
 
         # Wrap-up at end with multiplier for finite differencing
         if "form" in self.config["driver"]["optimization"].keys():
@@ -467,28 +460,9 @@ class PoseOptimization:
                 # make a unique filename with the same base as self.config["recorder"]["file"]
                 # separate out the filename without the extension
                 file_base = self.config["recorder"]["file"].split(".sql")[0]
-                # get all the files in the output folder that start with file_base
-                existing_files = list(Path(folder_output).glob(f"{file_base}*"))
-                if len(existing_files) > 0:
-                    # if file(s) exist with the same base name, make a new unique filename
 
-                    # get past numbers that were used to make unique files by matching
-                    # filenames against the file base name followed by a number
-                    past_numbers = [
-                        int(re.findall(f"{file_base}[0-9]+", str(fname))[0].split(file_base)[-1])
-                        for fname in existing_files
-                        if len(re.findall(f"{file_base}[0-9]+", str(fname))) > 0
-                    ]
-
-                    if len(past_numbers) > 0:
-                        # if multiple files have the same basename followed by a number,
-                        # take the maximum unique number and add one
-                        unique_number = int(max(past_numbers) + 1)
-                        recorder_path = Path(folder_output) / f"{file_base}{unique_number}.sql"
-                    else:
-                        # if no files have the same basename followed by a number,
-                        # but do have the same basename, then add a zero to the file basename
-                        recorder_path = Path(folder_output) / f"{file_base}0.sql"
+                recorder_fname = make_unique_case_name(Path(folder_output), file_base, ".sql")
+                recorder_path = Path(folder_output) / recorder_fname
 
             recorder_attachment = (
                 self.config["recorder"].get("recorder_attachment", "driver").lower()
