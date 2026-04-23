@@ -2786,6 +2786,60 @@ def test_multivariable_streams_example(subtests, temp_copy_of_example):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
+    "example_folder,resource_example_folder",
+    [("21_iron_examples/iron_cmu/scrap_only", None)],
+)
+def test_cmu_eaf_scrap_only_example(subtests, temp_copy_of_example):
+    example_folder = temp_copy_of_example
+
+    h2i = H2IntegrateModel(example_folder / "single_site_steel.yaml")
+
+    h2i.run()
+
+    h2i.post_process()
+
+    with subtests.test("EAF CapEx"):
+        capex = h2i.model.get_val("steel_plant.CapEx", units="USD")
+        assert pytest.approx(capex, rel=1e-4) == 762_839_961.07
+
+    with subtests.test("EAF OpEx"):
+        opex = h2i.model.get_val("steel_plant.OpEx", units="USD/year")
+        assert pytest.approx(opex, rel=1e-4) == 48_328_598.25
+
+    with subtests.test("LCOS"):
+        lcos = h2i.model.get_val("finance_subgroup_steel.LCOS", units="USD/kg")[0]
+        assert pytest.approx(lcos, rel=1e-4) == 0.2233330
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "example_folder,resource_example_folder",
+    [("21_iron_examples/iron_cmu/dri", None)],
+)
+def test_cmu_eaf_dri_example(subtests, temp_copy_of_example):
+    example_folder = temp_copy_of_example
+
+    h2i = H2IntegrateModel(example_folder / "single_site_steel.yaml")
+
+    h2i.run()
+
+    h2i.post_process()
+
+    with subtests.test("EAF CapEx"):
+        capex = h2i.model.get_val("steel_plant.CapEx", units="USD")
+        assert pytest.approx(capex, rel=1e-4) == 762_839_961.07
+
+    with subtests.test("EAF OpEx"):
+        opex = h2i.model.get_val("steel_plant.OpEx", units="USD/year")
+        assert pytest.approx(opex, rel=1e-4) == 48_328_598.25
+
+    with subtests.test("LCOS"):
+        lcos = h2i.model.get_val("finance_subgroup_steel.LCOS", units="USD/kg")[0]
+        assert pytest.approx(lcos, rel=1e-4) == 1.4932
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
     "example_folder,resource_example_folder", [("33_peak_load_management", None)]
 )
 def test_peak_load_management_example(subtests, temp_copy_of_example):
