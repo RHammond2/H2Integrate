@@ -101,6 +101,11 @@ class CMUElectricArcFurnaceScrapOnlyPerformanceConfig(BaseConfig):
 class CMUElectricArcFurnaceScrapOnlyPerformanceComponent(PerformanceModelBaseClass):
     """Electric Arc Furnace performance model based on CMU decarbSTEEL EAF Model v5"""
 
+    _time_step_bounds = (
+        3600,
+        3600,
+    )  # (min, max) time step lengths (in seconds) compatible with this model
+
     def initialize(self):
         super().initialize()
         self.commodity = "steel"
