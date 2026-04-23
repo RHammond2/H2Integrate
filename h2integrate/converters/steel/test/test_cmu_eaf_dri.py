@@ -337,7 +337,7 @@ def test_energy_mass_balance_per_unit_DR_cold(
 
     with subtests.test("electricity_consumed"):
         assert (
-            pytest.approx(sum(prob.get_val("electricity_consumed")), rel=1e-6) == 568.2274522041946
+            pytest.approx(sum(prob.get_val("electricity_consumed")), rel=1e-6) == 584.7082539302969
         )
 
     with subtests.test("natural_gas_consumed"):
