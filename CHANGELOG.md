@@ -8,6 +8,8 @@
   - Adds scrap-only performance model
   - Adds DRI + scrap performance model
   - Adds EAF cost model applicable to both performance models
+- Added electricity and water consumption profiles as outputs to the `ECOElectrolyzerPerformanceModel` [PR 690](https://github.com/NatLabRockies/H2Integrate/pull/690)
+- Add `PeakLoadManagementHeuristicOpenLoopStorageController` as a storage control strategy. [PR 641](https://github.com/NatLabRockies/H2Integrate/pull/641)
 
 ## 0.8 [April 15, 2026]
 - Updated README and docs intro page with expanded H2I description, reorganized sections, and streamlined installation instructions [PR 677](https://github.com/NatLabRockies/H2Integrate/pull/677)

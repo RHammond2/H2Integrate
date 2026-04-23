@@ -2836,3 +2836,49 @@ def test_cmu_eaf_dri_example(subtests, temp_copy_of_example):
     with subtests.test("LCOS"):
         lcos = h2i.model.get_val("finance_subgroup_steel.LCOS", units="USD/kg")[0]
         assert pytest.approx(lcos, rel=1e-4) == 1.4932
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "example_folder,resource_example_folder", [("33_peak_load_management", None)]
+)
+def test_peak_load_management_example(subtests, temp_copy_of_example):
+    example_folder = temp_copy_of_example
+
+    model = H2IntegrateModel(example_folder / "33_peak_load_management.yaml")
+    model.setup()
+    model.run()
+
+    with subtests.test("Battery SOC mean"):
+        soc = model.prob.get_val("battery.SOC", units="percent")
+        assert soc.mean() == pytest.approx(63.333, rel=1e-3)
+
+    with subtests.test("Battery SOC stays within bounds"):
+        soc = model.prob.get_val("battery.SOC", units="percent")
+        assert soc.max() <= 90.0 + 1e-3
+        assert soc.min() >= 10.0 - 1e-3
+
+    with subtests.test("Battery set point sum"):
+        set_point = model.prob.get_val("battery.electricity_set_point", units="kW")
+        assert set_point.sum() == pytest.approx(60.0, rel=1e-3)
+
+    with subtests.test("Battery electricity out sum"):
+        elec_out = model.prob.get_val("battery.electricity_out", units="kW")
+        assert elec_out.sum() == pytest.approx(60.0, rel=1e-3)
+
+    with subtests.test("Unmet demand sum"):
+        unmet = model.prob.get_val(
+            "electrical_load_demand.unmet_electricity_demand_out", units="kW"
+        )
+        assert unmet.sum() == pytest.approx(1947378.0, rel=1e-3)
+
+    with subtests.test("Battery CapEx"):
+        capex = model.prob.get_val("battery.CapEx", units="USD")
+        assert capex[0] == pytest.approx(603300.0, rel=1e-3)
+
+    with subtests.test("Unmet demand sum equals purchased electricity"):
+        battery_unmet_demand = model.prob.get_val(
+            "electrical_load_demand.unmet_electricity_demand_out", units="kW"
+        )
+        grid_purchase = model.prob.get_val("grid_buy.electricity_out", units="kW")
+        assert battery_unmet_demand.sum() == pytest.approx(grid_purchase.sum(), rel=1e-3)
