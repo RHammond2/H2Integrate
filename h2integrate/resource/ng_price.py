@@ -11,59 +11,65 @@ from h2integrate.core.utilities import BaseConfig
 from h2integrate.core.file_utils import get_path
 
 
-STATES = states = [
-    "AL",
-    "AK",
-    "AZ",
-    "AR",
-    "CA",
-    "CO",
-    "CT",
-    "DC",
-    "DE",
-    "FL",
-    "GA",
-    "HI",
-    "ID",
-    "IL",
-    "IN",
-    "IA",
-    "KS",
-    "KY",
-    "LA",
-    "ME",
-    "MD",
-    "MA",
-    "MI",
-    "MN",
-    "MS",
-    "MO",
-    "MT",
-    "NE",
-    "NV",
-    "NH",
-    "NJ",
-    "NM",
-    "NY",
-    "NC",
-    "ND",
-    "OH",
-    "OK",
-    "OR",
-    "PA",
-    "RI",
-    "SC",
-    "SD",
-    "TN",
-    "TX",
-    "UT",
-    "VT",
-    "VA",
-    "WA",
-    "WV",
-    "WI",
-    "WY",
-]
+STATE_MAP = states = {
+    "Alabama": "AL",
+    "Alaska": "AK",
+    "Arizona": "AZ",
+    "Arkansas": "AR",
+    "California": "CA",
+    "Colorado": "CO",
+    "Connecticut": "CT",
+    "Delaware": "DE",
+    "Florida": "FL",
+    "Georgia": "GA",
+    "Hawaii": "HI",
+    "Idaho": "ID",
+    "Illinois": "IL",
+    "Indiana": "IN",
+    "Iowa": "IA",
+    "Kansas": "KS",
+    "Kentucky": "KY",
+    "Louisiana": "LA",
+    "Maine": "ME",
+    "Maryland": "MD",
+    "Massachusetts": "MA",
+    "Michigan": "MI",
+    "Minnesota": "MN",
+    "Mississippi": "MS",
+    "Missouri": "MO",
+    "Montana": "MT",
+    "Nebraska": "NE",
+    "Nevada": "NV",
+    "New Hampshire": "NH",
+    "New Jersey": "NJ",
+    "New Mexico": "NM",
+    "New York": "NY",
+    "North Carolina": "NC",
+    "North Dakota": "ND",
+    "Ohio": "OH",
+    "Oklahoma": "OK",
+    "Oregon": "OR",
+    "Pennsylvania": "PA",
+    "Rhode Island": "RI",
+    "South Carolina": "SC",
+    "South Dakota": "SD",
+    "Tennessee": "TN",
+    "Texas": "TX",
+    "Utah": "UT",
+    "Vermont": "VT",
+    "Virginia": "VA",
+    "Washington": "WA",
+    "West Virginia": "WV",
+    "Wisconsin": "WI",
+    "Wyoming": "WY",
+    "District of Columbia": "DC",
+    "American Samoa": "AS",
+    "Guam": "GU",
+    "Northern Mariana Islands": "MP",
+    "Puerto Rico": "PR",
+    "United States Minor Outlying Islands": "UM",
+    "Virgin Islands, U.S.": "VI",
+}
 CURRENT_YEAR = datetime.now().year
 
 
@@ -95,19 +101,30 @@ class EIAIndustrialNaturalGasConfig(BaseConfig):
             2001 and the current year, inclusive of endpoints.
         monthly (Path): True, if monthly data is desired, False if annual data is desired.
         api_key_file (Path): Full file name of the file where the API key is located.
+        latitude (float, optional): Latitude of the site, optional.
+        latitude (float, optional): Longitude of the site, optional.
+        filename (str, optinal): Filename for where to save the data or where the data may
+            already be located. If the file exists, it will be used, and filtered to the
+            :py:attr:`resource_year`, otherwise, the data will be saved to this location.
     """
 
-    state: str = field(
-        converter=str.upper,
-        validator=attrs.validators.in_(STATES),
-    )
     resource_year: int = field(validator=attrs.validators.in_(range(2001, CURRENT_YEAR + 1)))
     monthly: bool = field(validator=attrs.validators.instance_of(bool))
     api_key_file: str = field(converter=get_path)
+    state: str = field(
+        converter=str.upper,
+        validator=attrs.validators.in_(STATE_MAP.values()),
+    )
+    latitude: float = field(default=0)
+    longitude: float = field(default=0)
+    filename: str = field(default=None, converter=attrs.converters.optional(get_path))
 
 
 class EIAIndustrialNaturalGasResource:
-    """Create the class."""
+    """EIA Industrial Natural Gas Pricing Downloader.
+
+    See https://www.eia.gov/dnav/ng/hist/n3035us3m.htm for further details.
+    """
 
     def __init__(self, resource_config: dict):
         # self.setup()
@@ -118,10 +135,21 @@ class EIAIndustrialNaturalGasResource:
         )
         self.url = self.create_url()
 
-    # def initialize(self):
-    #     self.options.declare("plant_config", types=dict)
-    #     self.options.declare("resource_config", types=dict)
-    #     self.options.declare("driver_config", types=dict)
+    def initialize(self):
+        self.options.declare("plant_config", types=dict)
+        self.options.declare("resource_config", types=dict)
+        self.options.declare("driver_config", types=dict)
+
+    def setup(self):
+        # Define inputs and outputs
+        self.config = EIAIndustrialNaturalGasConfig.from_dict(
+            self.options["resource_config"],
+            additional_cls_name=self.__class__.__name__,
+        )
+        site_config = self.options["plant_config"]["site"]
+        self.add_input("latitude", site_config.get("latitude", 0.0), units="deg")
+        self.add_input("longitude", site_config.get("longitude", 0.0), units="deg")
+        self.add_output("price", shape=12, val=0.0, units="USD/(ft**3/1000)")
 
     def create_url(self):
         base_url = "https://api.eia.gov/v2/natural-gas/pri/sum/data/"
@@ -141,29 +169,53 @@ class EIAIndustrialNaturalGasResource:
         url = f"{base_url}?{url_opts}"
         return url
 
-    def setup(self):
-        # Define inputs and outputs
-        self.config = EIAIndustrialNaturalGasConfig.from_dict(
-            self.options["resource_config"],
-            additional_cls_name=self.__class__.__name__,
-        )
-        # site_config = self.options["plant_config"]["site"]
+    def load_data(self, filename: Path | None = None) -> pd.DataFrame:
+        """Loads the previously saved data from :py:attr:`filename` if ``resource_year``
+        is available as either annual or monthly data, otherwise queries the EIA API.
 
-        # self.add_input("latitude", site_config.get("latitude", 0.0), units="deg")
-        # self.add_input("longitude", site_config.get("longitude", 0.0), units="deg")
-        # self.add_output("discharge", shape=8760, val=0.0, units="ft**3/s")
+        Args:
+            filename (Path | None, optional): The full filename where the natural gas pricing data
+                should be saved to or loaded from, if available. Defaults to None.
 
-    def load_data(self, filename: str | Path | None = None):
-        # download_from_api(self.url, filename)
+        Raises:
+            requests.exceptions.HTTPError: Raised if an unsuccessful API query result is returned.
+
+        Returns:
+            pandas.DataFrame: DataFrame with index "period" and column "value" with natural gas
+                pricing in $/MCF (USD per thousands of cubic feet) as either the monthly value
+                or extrapolated annual values to a monthly resolution.
+        """
+        filename = Path(filename).resolve()
+        if filename.exists():
+            df = pd.read_csv(filename, parse_dates=["period"]).set_index("period")
+            df = df.loc[df.index.dt.year.eq(self.config.resource_year)]
+            match df.shape[0]:
+                case 12:
+                    return df
+                case 1:
+                    year = self.config.resource_year
+                    df = df.reindex(
+                        pd.date_range(f"{year}-01", f"{year}-12", freq="MS"), method="nearest"
+                    )
+                    return df
+                case _:
+                    pass
+
         r = requests.get(self.url)
         if r.status_code != 200:
             err = json.loads(r.text)["error"]
             msg = f"{err['code']}: {err['message']}"
             raise requests.exceptions.HTTPError(msg)
 
-        cols = ["period", "area-name", "value", "units"]
+        cols = ["period", "value"]
         df = pd.DataFrame.from_dict(json.loads(r.text)["response"]["data"])[cols]
         df.period = pd.to_datetime(df.period)
+        df = df.set_index("period")
 
         if filename is not None:
-            df.to_csv(filename, index=False)
+            df.to_csv(filename, index_label="period")
+        return df
+
+    def compute(self, inputs, outputs):
+        ng_price_monthly = self.load_data(self.config.filename)
+        outputs["price"] = ng_price_monthly.to_numpy()
