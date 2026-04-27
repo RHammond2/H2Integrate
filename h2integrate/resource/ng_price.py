@@ -5,6 +5,7 @@ from datetime import datetime
 import attrs
 import pandas as pd
 import requests
+import openmdao.api as om
 from attrs import field, define
 
 from h2integrate.core.utilities import BaseConfig
@@ -142,7 +143,7 @@ class EIAIndustrialNaturalGasConfig(BaseConfig):
     filename: str = field(default=None, converter=attrs.converters.optional(get_path))
 
 
-class EIAIndustrialNaturalGasResource:
+class EIAIndustrialNaturalGasResource(om.ExplicitComponent):
     """EIA Industrial Natural Gas Pricing Downloader.
 
     See https://www.eia.gov/dnav/ng/hist/n3035us3m.htm for further details.
