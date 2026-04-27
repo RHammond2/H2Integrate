@@ -73,6 +73,28 @@ STATE_MAP = states = {
 CURRENT_YEAR = datetime.now().year
 
 
+def convert_to_monthly(df: pd.DataFrame, year: int) -> pd.DataFrame | None:
+    """Converts an annual timeseries to monthly by repeating the one value, or returns
+    the data passed, if already monthly.
+
+    Args:
+        df (pd.DataFrame): The annual or monthly natural gas pricing data.
+        year (int): The resource year.
+
+    Returns:
+        pd.DataFrame | None: Returns back the monthly data if the original data have either
+            1 or 12 data entries, otherwise None is returned.
+    """
+    match df.shape[0]:
+        case 12:
+            return df
+        case 1:
+            df = df.reindex(pd.date_range(f"{year}-01", f"{year}-12", freq="MS"), method="nearest")
+            return df
+        case _:
+            pass
+
+
 def get_eia_api_key(filename: Path) -> str:
     """Retrieves the EIA API key from a file, and returns the key following "EIA_API_KEY:".
 
@@ -189,17 +211,9 @@ class EIAIndustrialNaturalGasResource:
         if filename.exists():
             df = pd.read_csv(filename, parse_dates=["period"]).set_index("period")
             df = df.loc[df.index.dt.year.eq(self.config.resource_year)]
-            match df.shape[0]:
-                case 12:
-                    return df
-                case 1:
-                    year = self.config.resource_year
-                    df = df.reindex(
-                        pd.date_range(f"{year}-01", f"{year}-12", freq="MS"), method="nearest"
-                    )
-                    return df
-                case _:
-                    pass
+            df = convert_to_monthly(df, self.config.resource_year)
+            if df is not None:
+                return df
 
         r = requests.get(self.url)
         if r.status_code != 200:
@@ -211,6 +225,7 @@ class EIAIndustrialNaturalGasResource:
         df = pd.DataFrame.from_dict(json.loads(r.text)["response"]["data"])[cols]
         df.period = pd.to_datetime(df.period)
         df = df.set_index("period")
+        df = convert_to_monthly(df)
 
         if filename is not None:
             df.to_csv(filename, index_label="period")
