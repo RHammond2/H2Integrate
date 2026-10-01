@@ -526,6 +526,8 @@ class PYSAMWindPlantPerformanceModel(WindPerformanceBaseClass):
         )
         native_lifetime_output = hasattr(self.system_model, "Lifetime")
 
+        # TODO: incorporate reliability in "electricity_out", and total/annual calculations
+        # TODO: turn off the penalty
         if use_lifetime_output:
             if not native_lifetime_output:
                 degradation = self.design_dict["Lifetime"]["ac_degradation"]
