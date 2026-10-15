@@ -187,7 +187,7 @@ def _validator_comments(tech_config: dict) -> dict[tuple[str, str, str], str]:
             model is indexed under both its model-specific section and
             ``shared_parameters``.
     """
-    comments = {}
+    comments: dict[tuple[str, str, str], str] = {}
     for tech_name, tech_info in tech_config.get("technologies", {}).items():
         for model_type, section_name in MODEL_SECTION_NAMES.items():
             model_info = tech_info.get(model_type, {})
@@ -270,7 +270,7 @@ def extract_model_inputs(
 
     # Try to instantiate the config class with minimal input
     try:
-        config_dict = {}
+        config_dict: dict = {}
         config_instance = config_class.from_dict(config_dict, strict=False)
         params_dict = config_instance.as_dict()
     except (AttributeError, KeyError, TypeError, ValueError):
@@ -289,7 +289,7 @@ def extract_model_inputs(
 
                 # Use the default value if available, else use None as placeholder
                 if attribute.default != attr.NOTHING:
-                    if isinstance(attribute.default, attr.Factory):
+                    if isinstance(attribute.default, attr.Factory):  # type: ignore[arg-type]
                         # Try to call the factory, or use None
                         try:
                             params_dict[attribute.name] = attribute.default.factory()
@@ -335,7 +335,7 @@ def organize_model_parameters(
         dict: Organized model_inputs with shared_parameters, control_parameters, etc.
     """
     model_inputs = {}
-    all_params_by_section = {
+    all_params_by_section: dict[str, dict] = {
         "performance": {},
         "control": {},
         "cost": {},

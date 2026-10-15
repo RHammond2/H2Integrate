@@ -92,7 +92,7 @@ def convert_to_monthly(df: pd.DataFrame, start_year: int, end_year: int) -> pd.D
         if not is_multi_ix:
             return df.resample("MS").bfill()  # ensure it's always the start of the month
         df = (
-            df.unstack(level=ix_levels)  # noqa: PD010, PD013 <- melt and pivot create more work
+            df.unstack(level=ix_levels)  # type: ignore[assignment]  # noqa: PD010, PD013 <- melt and pivot create more work
             .resample("MS")
             .bfill()
             .stack(level=ix_levels, future_stack=True)
@@ -109,7 +109,7 @@ def convert_to_monthly(df: pd.DataFrame, start_year: int, end_year: int) -> pd.D
             return df
         print(df.index.names)
         df = (
-            df.unstack(level=ix_levels)  # noqa: PD010, PD013 <- melt and pivot create more work
+            df.unstack(level=ix_levels)  # type: ignore[assignment]  # noqa: PD010, PD013 <- melt and pivot create more work
             .reindex(monthly_ix, method="ffill")
             .stack(level=ix_levels, future_stack=True)
             .sort_index()
@@ -145,15 +145,15 @@ def convert_to_hourly(df: pd.DataFrame) -> pd.DataFrame:
     if is_multi_ix:
         ix_names = [el for el in df.index.names if el != "period"]
         ix_levels = list(range(1, len(ix_names) + 1))
-        df = df.unstack(level=ix_levels)  # noqa: PD010
+        df = df.unstack(level=ix_levels)  # type: ignore[assignment]  # noqa: PD010
     last = df.iloc[[-1]].resample("ME").ffill()
     last.index = pd.DatetimeIndex(
         [pd.to_datetime(last.index[0].to_pydatetime().replace(hour=23))], name="period"
     )
     df = pd.concat((df, last)).resample("h").ffill()
-    df = df.drop(df.loc[(df.index.month == 2) & (df.index.day == 29)].index)
+    df = df.drop(df.loc[(df.index.month == 2) & (df.index.day == 29)].index)  # type: ignore[attr-defined]
     if is_multi_ix:
-        df = df.stack(level=ix_levels)  # noqa: PD013
+        df = df.stack(level=ix_levels)  # type: ignore[assignment]  # noqa: PD013
     if df.shape[0] % HOURS_PER_YEAR != 0:
         msg = f"An error occurred converting data to hourly to match size ({df.shape[0]}) to 8760"
         raise ValueError(msg)
@@ -359,7 +359,7 @@ def get_eia_ng_data(
             feedstock_dir = check_feedstock_dir(data_dir=feedstock_dir, data_subdir="natural_gas")
         else:
             feedstock_dir = check_feedstock_dir(data_dir=feedstock_dir)
-    file_path = filename if filename is None else _validate_file_name(feedstock_dir / filename)
+    file_path = filename if filename is None else _validate_file_name(feedstock_dir / filename)  # type: ignore[operator]
     state = _validate_state(state)
     price_category = _validate_price_category(price_category)
     resource_year = _validate_resource_year(resource_year)
@@ -374,8 +374,8 @@ def get_eia_ng_data(
         if file_path.exists():
             df = pd.read_csv(file_path, parse_dates=["period"]).set_index("period")
             df = df.loc[
-                (df.index.year >= start)
-                & (df.index.year <= end)
+                (df.index.year >= start)  # type: ignore[attr-defined, assignment]
+                & (df.index.year <= end)  # type: ignore[attr-defined, index]
                 & df.category.isin(price_category)
                 & df.state.isin(state),
                 keep_cols,
@@ -401,8 +401,8 @@ def get_eia_ng_data(
     if df.size == 0:
         raise ValueError(f"No data for combination {state=}, {price_category=}")
 
-    df.period = pd.to_datetime(df.period)  # NOTE: if annual, converts year to Jan 1 timestamp
-    df.value = df.value.astype(float)
+    df.period = pd.to_datetime(df.period)  # type: ignore[attr-defined]  # NOTE: if annual, converts year to Jan 1 timestamp
+    df.value = df.value.astype(float)  # type: ignore[attr-defined]
     df = (
         df.set_index("period")
         .rename(columns={"value": "price", "area-name": "state", "process-name": "category"})
@@ -411,15 +411,15 @@ def get_eia_ng_data(
         .replace(NG_PROCESS_NAME_MAP)
     )
     if "state" in keep_cols:
-        df.state = (
-            df.state.str.replace("USA-", "")
+        df.state = (  # type: ignore[attr-defined]
+            df.state.str.replace("USA-", "")  # type: ignore[attr-defined]
             .str.title()
             .replace(geospatial.US_STATE_MAP)
             .str.upper()
         )
     df = df.set_index([el for el in keep_cols if el != "price"], append=True)
     df = convert_to_monthly(df, *resource_year)
-    df.price *= MCF_to_MMBTU
+    df.price *= MCF_to_MMBTU  # type: ignore[attr-defined]
 
     if file_path is not None:
         df.to_csv(file_path, index_label="period")

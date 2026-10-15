@@ -86,7 +86,7 @@ def convert_state_to_code(state: str) -> str:
 
 def get_state_from_coords(
     *,
-    coordinates: tuple[float, float] | list[tuple, float, float] | None = None,
+    coordinates: tuple[float, float] | list[tuple[float, float]] | None = None,
     latitude: float | list[float] | None = None,
     longitude: float | list[float] | None = None,
 ) -> str | list[str]:
