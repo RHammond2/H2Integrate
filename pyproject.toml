@@ -324,9 +324,11 @@ module = [
   "pyomo.*",
   "pyoptsparse.*",
   "PySAM.*",
+  "pyxdsm.*",
   "retry_requests.*",
   "reverse_geocoder.*",
   "rex.*",
+  "turbine_models.*",
   "wombat.*",
   "xyzservices.*",
 ]
