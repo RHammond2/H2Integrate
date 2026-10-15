@@ -38,8 +38,8 @@ class StorageSizingModelConfig(StoragePerformanceBaseConfig):
             (i.e., kW*h or kg). If not provided, defaults to commodity_rate_units*h.
     """
 
-    commodity: str = field(converter=(str.strip, str.lower))
-    commodity_rate_units: str = field(converter=str.strip)
+    commodity: str = field(converter=(str.strip, str.lower))  # type: ignore[misc]
+    commodity_rate_units: str = field(converter=str.strip)  # type: ignore[misc]
 
     # TODO: add in logic for having different discharge rate
     # charge_equals_discharge: bool = field(default=True)

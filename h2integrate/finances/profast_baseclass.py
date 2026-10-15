@@ -314,7 +314,8 @@ class ProFASTDefaultCapitalItem(BaseConfig):
 
     depr_period: int = field(converter=int, validator=validators.in_([3, 5, 7, 10, 15, 20]))
     depr_type: str = field(
-        converter=str.strip, validator=validators.in_(["MACRS", "Straight line"])
+        converter=str.strip,
+        validator=validators.in_(["MACRS", "Straight line"]),  # type: ignore[misc]
     )
     refurb: int | float | list[float] = field(default=[0.0])
     replacement_cost_percent: float = field(

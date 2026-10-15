@@ -12,7 +12,7 @@ from h2integrate.converters.hydrogen.geologic.h2_well_subsurface_baseclass impor
 
 
 @define(kw_only=True)
-class GeoH2SubsurfaceCostConfig(GeoH2SubsurfaceCostConfig):
+class GeoH2SubsurfaceCostConfig(GeoH2SubsurfaceCostConfig):  # type: ignore[no-redef]
     """Configuration for subsurface well cost parameters in geologic hydrogen models.
 
     This configuration defines cost parameters specific to subsurface well

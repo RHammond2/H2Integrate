@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from attrs import field, define, converters, validators
 from xyzservices import TileProvider
 from shapely.geometry import LineString
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes  # type: ignore[import-untyped]
 
 from h2integrate.core.utilities import BaseConfig
 from h2integrate.core.file_utils import find_file
@@ -163,10 +163,10 @@ class GeospatialMapConfig(BaseConfig):
         default=None,
         converter=converters.optional(tuple),
         validator=validators.optional(
-            [
+            [  # type: ignore[arg-type]
                 validators.max_len(2),
                 validators.min_len(2),
-                validators.deep_iterable(
+                validators.deep_iterable(  # type: ignore[list-item]
                     member_validator=validators.instance_of((float, int)),
                     iterable_validator=validators.instance_of(tuple),
                 ),
@@ -182,7 +182,7 @@ class GeospatialMapConfig(BaseConfig):
     basemap_rightpad: float = field(default=0.05)
     basemap_upperpad: float = field(default=0.2125)
     basemap_lowerpad: float = field(default=0.05)
-    basemap_provider: TileProvider = field(default=ctx.providers.OpenStreetMap.Mapnik)
+    basemap_provider: TileProvider = field(default=ctx.providers.OpenStreetMap.Mapnik)  # type: ignore[attr-defined]
     basemap_zoom: int = field(default=6)
     zorder: int = field(default=1)
     linestyle: str = field(default="--")
@@ -279,6 +279,7 @@ def plot_geospatial_point_heat_map(
             )
 
     case_results_fpath = find_file(case_results_fpath)
+    assert isinstance(case_results_fpath, Path)
 
     if ".csv" in case_results_fpath.suffix:
         results_df = pd.read_csv(case_results_fpath)
@@ -328,10 +329,12 @@ def plot_geospatial_point_heat_map(
         )
         raise ValueError(msg)
     else:
+        assert isinstance(fig, plt.Figure)
+        assert isinstance(ax, plt.Axes)
         plt.figure(fig.number)
         plt.sca(ax)
-        base_layer_gdf = validate_gdfs_are_same_crs(base_layer_gdf, results_gdf)
-        gdfs_for_bounds.extend(base_layer_gdf)
+        base_layer_gdf = validate_gdfs_are_same_crs(base_layer_gdf, results_gdf)  # type: ignore[arg-type]
+        gdfs_for_bounds.extend(base_layer_gdf)  # type: ignore[arg-type]
 
     # Determine appropriate lower and upper bounds for the colormap and legend
     if map_preferences.colorbar_limits is None:
@@ -390,8 +393,8 @@ def plot_geospatial_point_heat_map(
     )
 
     # format color bar legend offset text and position (exp notation for values if applicable)
-    cbar.formatter.set_scientific(map_preferences.colorbar_tick_label_use_exp_notation)
-    cbar.formatter.set_powerlimits(map_preferences.colorbar_tick_label_exp_notation_decimal_limit)
+    cbar.formatter.set_scientific(map_preferences.colorbar_tick_label_use_exp_notation)  # type: ignore[attr-defined]
+    cbar.formatter.set_powerlimits(map_preferences.colorbar_tick_label_exp_notation_decimal_limit)  # type: ignore[attr-defined]
 
     offset_text = cbar.ax.xaxis.get_offset_text()
     offset_text.set_fontsize(map_preferences.colorbar_tick_label_font_size)
@@ -529,7 +532,7 @@ def plot_straight_line_shipping_routes(
             )
 
     shipping_coords_fpath = find_file(shipping_coords_fpath)
-
+    assert isinstance(shipping_coords_fpath, Path)
     if ".csv" in shipping_coords_fpath.suffix:
         shipping_coords_df = pd.read_csv(shipping_coords_fpath, index_col=0)
     else:
@@ -576,10 +579,12 @@ def plot_straight_line_shipping_routes(
         )
         raise ValueError(msg)
     else:
+        assert isinstance(fig, plt.Figure)
+        assert isinstance(ax, plt.Axes)
         plt.figure(fig.number)
         plt.sca(ax)
-        base_layer_gdf = validate_gdfs_are_same_crs(base_layer_gdf, shipping_route_gdf)
-        gdfs_for_bounds.extend(base_layer_gdf)
+        base_layer_gdf = validate_gdfs_are_same_crs(base_layer_gdf, shipping_route_gdf)  # type: ignore[arg-type]
+        gdfs_for_bounds.extend(base_layer_gdf)  # type: ignore[arg-type]
 
     shipping_route_gdf.plot(
         ax=ax,
@@ -654,13 +659,13 @@ def calculate_geodataframe_total_bounds(*gdfs: gpd.GeoDataFrame | list[gpd.GeoDa
     if not gdfs:
         raise ValueError("Must provide at least one GeoDataFrame.")
 
-    base_crs = gdfs[0].crs
+    base_crs = gdfs[0].crs  # type: ignore[union-attr]
     for gdf in gdfs:
-        if gdf.crs != base_crs:
+        if gdf.crs != base_crs:  # type: ignore[union-attr]
             raise ValueError("All GeoDataFrames must have the same CRS.")
 
     # Extract the min and max X (Longitude) and Y (Latitude) from the total bounds of all gdfs
-    min_xs, min_ys, max_xs, max_ys = zip(*(gdf.total_bounds for gdf in gdfs))
+    min_xs, min_ys, max_xs, max_ys = zip(*(gdf.total_bounds for gdf in gdfs))  # type: ignore[union-attr]
 
     min_x = min(min_xs)
     min_y = min(min_ys)
