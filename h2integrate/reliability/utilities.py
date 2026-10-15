@@ -5,7 +5,7 @@ SECONDS_IN_HOUR = 60 * 60
 SECONDS_IN_YEAR = 8760 * SECONDS_IN_HOUR
 
 
-def update_dimensions(n_components: int, *args: np.ndarray):
+def update_dimensions(n_components: int, *args: np.ndarray) -> tuple[int, tuple[np.ndarray, ...]]:
     """Update the dimensionality of a series of columnar arrays and the value of
     :py:attr:`n_components` to match. If the size of an array passed :py:attr:`args` is 1 and
     :py:attr:`n_components` is greater than 1, all arrays passed to :py:attr:`args` will be
@@ -21,11 +21,11 @@ def update_dimensions(n_components: int, *args: np.ndarray):
         args: The arrays as passed or the arrays reshaped to shape (:py:attr:`n_components`, 1).
     """
     if args[0].size == 1 and n_components > 1:
-        args = list(args)
+        args = list(args)  # type: ignore
         shape = (n_components, 1)
-        args = [np.broadcast_to(arg, shape) for arg in args]
+        args = [np.broadcast_to(arg, shape) for arg in args]  # type: ignore
     n_components = args[0].size
-    return n_components, *args
+    return n_components, *args  # type: ignore[return-value]
 
 
 def calculate_simulation_years(value, self_) -> float:

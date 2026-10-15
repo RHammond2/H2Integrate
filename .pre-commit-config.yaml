@@ -41,7 +41,7 @@ repos:
     rev: v2.4.0
     hooks:
       - id: mypy
-        entry: mypy h2integrate --install-types --non-interactive
+        entry: mypy --install-types --non-interactive
         additional_dependencies:
           - pandas-stubs
           - types-geopandas

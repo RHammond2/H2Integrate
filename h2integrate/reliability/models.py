@@ -21,7 +21,7 @@ from h2integrate.reliability.utilities import (
 DEFAULT_SEED = 279299947538423226929715083173412195503
 
 
-def generate_rng(seed: int = DEFAULT_SEED) -> np.random.BitGenerator:
+def generate_rng(seed: int = DEFAULT_SEED) -> np.random.Generator:
     """Generate a ``numpy.random.default_rng()`` based on :py:attr:`seed`.
 
     Uses the module :py:attr:`DEFAULT_SEED` generated from ``np.random.SeedSequence().entropy``
@@ -33,7 +33,7 @@ def generate_rng(seed: int = DEFAULT_SEED) -> np.random.BitGenerator:
             before passing a custom value. Defaults to DEFAULT_SEED.
 
     Returns:
-        np.random.BitGenerator: A seeded instance of ``np.random.default_rng`` is returned.
+        np.random.Generator: A seeded instance of ``np.random.default_rng`` is returned.
     """
     return np.random.default_rng(seed)
 
@@ -74,7 +74,7 @@ def create_downtime_model(config: dict | int):
         BaseDowntime: An initialized downtime model.
     """
     if not isinstance(config, dict):
-        return FixedDowntime(hours=config)
+        return FixedDowntime(hours=config)  # type: ignore  # TODO: add
     name = config["model"]
     parameters = {k: v for k, v in config.items() if k != "model"}
     match name:
@@ -113,18 +113,18 @@ class SimulationConfig(BaseConfig):
     n_timesteps_in_year: int = field(
         default=0,
         init=False,
-        converter=attrs.Converter(calculate_annual_timesteps, takes_self=True),
+        converter=attrs.Converter(calculate_annual_timesteps, takes_self=True),  # type: ignore[misc]
     )
     n_timesteps_in_hour: int = field(
         default=0,
         init=False,
-        converter=attrs.Converter(calculate_hourly_timesteps, takes_self=True),
+        converter=attrs.Converter(calculate_hourly_timesteps, takes_self=True),  # type: ignore[misc]
     )
     simulation_years: float = field(
         init=False,
         default=0,
-        converter=attrs.Converter(calculate_simulation_years, takes_self=True),
-        validator=validators.instance_of(float),
+        converter=attrs.Converter(calculate_simulation_years, takes_self=True),  # type: ignore[misc]
+        validator=validators.instance_of(float),  # type: ignore[arg-type]
     )
 
 
@@ -144,16 +144,17 @@ class BaseDowntime(ABC, BaseConfig):
             Defaults to 1.
 
     Attributes:
-        rng (np.random.BitGenerator): The NumPy random generator instance. Created automatically
+        rng (np.random.Generator): The NumPy random generator instance. Created automatically
             from the :py:func:generate_rng` and recreated during every call to run for consistent
             results between runs.
     """
 
     simulation: SimulationConfig = field(
-        converter=SimulationConfig.from_dict, validator=validators.instance_of(SimulationConfig)
+        converter=SimulationConfig.from_dict,  # type: ignore[misc]
+        validator=validators.instance_of(SimulationConfig),  # type: ignore[misc]
     )
     n_components: int = field(default=1, validator=(validators.instance_of(int), validators.ge(1)))
-    rng: np.random.BitGenerator | None = field(factory=generate_rng)
+    rng: np.random.Generator | None = field(factory=generate_rng)
 
     @abstractmethod
     def sample_downtime(self) -> np.ndarray:
@@ -207,7 +208,7 @@ class BaseReliability(ABC, BaseConfig):
         downtime (dict): Configuration for a downtime model.
 
     Attributes:
-        rng (np.random.BitGenerator): The NumPy random generator instance. Created automatically
+        rng (np.random.Generator): The NumPy random generator instance. Created automatically
             from the :py:func:generate_rng` and recreated during every call to run for consistent
             results between runs.
         time_to_failures (np.ndarray): Array of the hours to the next failure for each modeled
@@ -221,13 +222,14 @@ class BaseReliability(ABC, BaseConfig):
     """
 
     simulation: SimulationConfig = field(
-        converter=SimulationConfig.from_dict, validator=validators.instance_of(SimulationConfig)
+        converter=SimulationConfig.from_dict,  # type: ignore[misc]
+        validator=validators.instance_of(SimulationConfig),  # type: ignore[misc]
     )
     availability_type: str = field(validator=validators.in_(AVAILABILITY_TYPES))
     burn_in: float = field(default=0, converter=float, validator=validators.ge(0))
     n_components: int = field(default=1, validator=(validators.instance_of(int), validators.ge(1)))
     downtime: dict | BaseDowntime = field(validator=validators.instance_of((dict, BaseDowntime)))
-    rng: np.random.BitGenerator | None = field(factory=generate_rng)
+    rng: np.random.Generator | None = field(factory=generate_rng)
 
     time_to_failures: np.ndarray = field(init=False, validator=validators.instance_of(np.ndarray))
     downtime_per_event: np.ndarray = field(init=False, validator=validators.instance_of(np.ndarray))
@@ -356,7 +358,7 @@ class PerformanceReliability(BaseConfig):
             not need to be defined here.
 
     Attributes:
-        rng (np.random.BitGenerator): The NumPy random generator instance. Created automatically
+        rng (np.random.Generator): The NumPy random generator instance. Created automatically
             from the :py:func:generate_rng` and recreated during every call to run for consistent
             results between runs.
         availability (np.ndarray): Total availability, with shape
@@ -365,7 +367,7 @@ class PerformanceReliability(BaseConfig):
         maintenance (BaseReliability): Reliability model for the maintenance downtime events.
     """
 
-    simulation: dict | SimulationConfig = field(converter=SimulationConfig.from_dict)
+    simulation: dict | SimulationConfig = field(converter=SimulationConfig.from_dict)  # type: ignore[misc]
     availability_type: str = field(validator=validators.in_(AVAILABILITY_TYPES))
     use_reliability: bool = field(default=True, validator=validators.instance_of(bool))
     burn_in: float = field(default=0, converter=float, validator=validators.ge(0))
@@ -381,7 +383,7 @@ class PerformanceReliability(BaseConfig):
     maintenance_parameters: dict | None = field(
         default=None, validator=validators.optional(validators.instance_of(dict))
     )
-    rng: np.random.BitGenerator | None = field(factory=generate_rng)
+    rng: np.random.Generator | None = field(factory=generate_rng)
     availability: np.ndarray = field(
         validator=validators.optional(validators.instance_of(np.ndarray)), init=False
     )
@@ -499,12 +501,12 @@ class FixedDowntime(BaseDowntime):
             Defaults to 1.
 
     Attributes:
-        rng (np.random.BitGenerator): The NumPy random generator instance. Created automatically
+        rng (np.random.Generator): The NumPy random generator instance. Created automatically
             from the :py:func:generate_rng`.
     """
 
     hours: int | ArrayLike = field(
-        converter=to_array(int, (-1, 1)),
+        converter=to_array(int, (-1, 1)),  # type: ignore[misc]
         validator=(validators.instance_of(np.ndarray), array_ge(1)),
     )
 
@@ -542,7 +544,7 @@ class UniformDowntime(BaseDowntime):
             Defaults to 1.
 
     Attributes:
-        rng (np.random.BitGenerator): The NumPy random generator instance. Created automatically
+        rng (np.random.Generator): The NumPy random generator instance. Created automatically
             from the :py:func:generate_rng`.
 
     .. _NumPy uniform random generator:
@@ -550,18 +552,18 @@ class UniformDowntime(BaseDowntime):
     """
 
     min_hours: int | ArrayLike = field(
-        converter=to_array(int, (-1, 1)),
+        converter=to_array(int, (-1, 1)),  # type: ignore[misc]
         validator=(validators.instance_of(np.ndarray), array_ge(1)),
     )
     max_hours: int | ArrayLike = field(
-        converter=to_array(int, (-1, 1)),
+        converter=to_array(int, (-1, 1)),  # type: ignore[misc]
         validator=(validators.instance_of(np.ndarray), array_ge(1)),
     )
 
     @max_hours.validator
     def validate_max_hours(self, attribute, value: int):
         """Ensures that :py:attr:`value` is greater than :py:attr:`min_hours`."""
-        if (value <= self.min_hours).any():
+        if (value <= self.min_hours).any():  # type: ignore
             msg = f"'max_hours' ({value}) must be greater than 'min_hours'({self.min_hours})."
             raise ValueError(msg)
 
@@ -602,19 +604,19 @@ class LogNormalDowntime(BaseDowntime):
             Defaults to 1.
 
     Attributes:
-        rng (np.random.BitGenerator): The NumPy random generator instance. Created automatically
+        rng (np.random.Generator): The NumPy random generator instance. Created automatically
             from the :py:func:generate_rng`.
 
     .. _NumPy log-normal random generator:
        https://numpy.org/doc/2.2/reference/random/generated/numpy.random.Generator.lognormal.html#numpy.random.Generator.lognormal
     """
 
-    mean: float = field(
-        converter=to_array(float, (-1, 1)),
+    mean: float | ArrayLike = field(
+        converter=to_array(float, (-1, 1)),  # type: ignore[misc]
         validator=(validators.instance_of(np.ndarray), array_ge(0)),
     )
-    sigma: float = field(
-        converter=to_array(float, (-1, 1)),
+    sigma: float | ArrayLike = field(
+        converter=to_array(float, (-1, 1)),  # type: ignore[misc]
         validator=(validators.instance_of(np.ndarray), match_shape("mean"), array_ge(0)),
     )
 
@@ -630,8 +632,9 @@ class LogNormalDowntime(BaseDowntime):
         Returns:
             np.ndarray: An array of the next 100 events' downtime durations.
         """
+        assert isinstance(self.rng, np.random.Generator)
         return np.ceil(
-            self.rng.lognormal(self.mean, self.sigma, size=(self.mean.shape[0], 100))
+            self.rng.lognormal(self.mean, self.sigma, size=(self.mean.shape[0], 100))  # type: ignore
             / self.simulation.n_timesteps_in_hour
         ).astype(int)
 
@@ -676,7 +679,7 @@ class WeibullReliability(BaseReliability):
         downtime (dict): Configuration for a downtime model.
 
     Attributes:
-        rng (np.random.BitGenerator): The NumPy random generator instance. Created automatically
+        rng (np.random.Generator): The NumPy random generator instance. Created automatically
             from the :py:func:generate_rng`.
         time_to_failures (np.ndarray): Array of the hours to the next failure for each modeled
             component. Generated by each subclass' :py:meth:`sample_events`.
@@ -691,12 +694,12 @@ class WeibullReliability(BaseReliability):
        https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.weibull.html
     """
 
-    scale: float = field(
-        converter=to_array(float, (-1, 1)),
+    scale: float | ArrayLike = field(
+        converter=to_array(float, (-1, 1)),  # type: ignore[misc]
         validator=validators.instance_of(np.ndarray),
     )
-    shape: float = field(
-        converter=to_array(float, (-1, 1)),
+    shape: float | ArrayLike = field(
+        converter=to_array(float, (-1, 1)),  # type: ignore[misc]
         validator=(validators.instance_of(np.ndarray), match_shape("scale")),
     )
 
@@ -753,7 +756,7 @@ class FixedIntervalReliability(BaseReliability):
         downtime (dict): Configuration for a downtime model.
 
     Attributes:
-        rng (np.random.BitGenerator): The NumPy random generator instance. Created automatically
+        rng (np.random.Generator): The NumPy random generator instance. Created automatically
             from the :py:func:generate_rng`.
         time_to_failures (np.ndarray): Array of the hours to the next failure for each modeled
             component. Generated by each subclass' :py:meth:`sample_events`.
@@ -765,8 +768,8 @@ class FixedIntervalReliability(BaseReliability):
             time step of the simulation.
     """
 
-    frequency: float = field(
-        converter=to_array(float, (-1, 1)),
+    frequency: float | ArrayLike = field(
+        converter=to_array(float, (-1, 1)),  # type: ignore[misc]
         validator=(validators.instance_of(np.ndarray), array_gt(0)),
     )
 
