@@ -414,7 +414,7 @@ class CacheBaseClass(om.ExplicitComponent):
         """
 
         # If not caching is not enabled, return False to indicate that outputs have not been set
-        if not self.config.enable_caching:
+        if not self.config.enable_caching:  # type: ignore[attr-defined]
             return False
 
         # If caching is enabled, check if file exists with cached results
@@ -422,7 +422,7 @@ class CacheBaseClass(om.ExplicitComponent):
         # Check if config_dict was input as an empty dictionary
         if not bool(config_dict):
             # If it was, create config_dict from config attribute
-            config_dict = self.config.as_dict()
+            config_dict = self.config.as_dict()  # type: ignore[attr-defined]
 
         # Create unique filename for cached results based on inputs and config
         cache_filename = self.make_cache_hash_filename(config_dict, inputs, discrete_inputs)
@@ -469,7 +469,7 @@ class CacheBaseClass(om.ExplicitComponent):
                 config_dict is created from `self.config.as_dict()`
         """
         # If not caching is not enabled, return without caching outputs
-        if not self.config.enable_caching:
+        if not self.config.enable_caching:  # type: ignore[attr-defined]
             return
 
         # Cache the results for future use if caching is enabled
@@ -477,7 +477,7 @@ class CacheBaseClass(om.ExplicitComponent):
         # Check if config_dict was input as an empty dictionary
         if not bool(config_dict):
             # Create config_dict from config attribute
-            config_dict = self.config.as_dict()
+            config_dict = self.config.as_dict()  # type: ignore[attr-defined]
 
         # Create unique filename for cached results based on inputs and config
         cache_filename = self.make_cache_hash_filename(config_dict, inputs, discrete_inputs)

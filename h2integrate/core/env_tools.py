@@ -96,7 +96,7 @@ def load_env_vars_from_file(file_path: str | Path) -> dict[str, str]:
 def get_environment_variables(
     *args: str,
     file_name: str | None = ".env",
-    file_path: str | None = None,
+    file_path: str | Path | None = None,
     set_variables: bool = True,
 ):
     """Retrieve a series of environment variables and values from existing environment variables,
