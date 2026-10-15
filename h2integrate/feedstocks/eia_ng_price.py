@@ -60,12 +60,12 @@ class EIANaturalGasFeedstockConfig(BaseConfig):
 
     resource_year: int = field(validator=validators.in_(range(2001, CURRENT_YEAR + 1)))
     monthly: bool = field(validator=validators.instance_of(bool))
-    price_category: str = field(converter=str.lower, validator=validators.in_(eia.EIA_NG_FACET))
+    price_category: str = field(converter=str.lower, validator=validators.in_(eia.EIA_NG_FACET))  # type: ignore[misc]
     api_key_file: str | None = field(default=None, converter=attrs.converters.optional(get_path))
-    state: str = field(
+    state: str | None = field(
         default=None,
         converter=attrs.converters.optional(
-            attrs.converters.pipe(geospatial.convert_state_value, geospatial.convert_state_to_code)
+            attrs.converters.pipe(geospatial.convert_state_value, geospatial.convert_state_to_code)  # type: ignore[misc]
         ),
         validator=validators.optional(
             validators.in_([*geospatial.US_STATE_MAP, *geospatial.US_STATE_MAP.values()])
@@ -77,7 +77,9 @@ class EIANaturalGasFeedstockConfig(BaseConfig):
     longitude: float | None = field(
         default=None, validator=validators.optional((validators.ge(-180), validators.le(180)))
     )
-    site_name: str = field(default=None, validator=validators.optional(validators.instance_of(str)))
+    site_name: str | None = field(
+        default=None, validator=validators.optional(validators.instance_of(str))
+    )
     cost_year: int = field(default=CURRENT_YEAR)
     annual_cost: float = field(default=0.0, converter=float)
     start_up_cost: float = field(default=0.0, converter=float)
