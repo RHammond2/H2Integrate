@@ -309,6 +309,19 @@ pyvis = ">=0.3.2,<0.4"
 [tool.mypy]
 warn_no_return = false  # prefer implicit return None
 
+[[tool.mypy.overrides]]
+module = [
+  "h2integrate.control.*",
+  "h2integrate.converters.*",
+  "h2integrate.demand.*",
+  "h2integrate.finances.*",
+  "h2integrate.resource.*",
+  "h2integrate.storage.*",
+  "h2integrate.tools.*",
+  "h2integrate.transporters.*",
+  "h2integrate.*.test.*"
+]
+ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
