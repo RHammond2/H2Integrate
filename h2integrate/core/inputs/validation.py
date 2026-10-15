@@ -171,7 +171,7 @@ def load_driver_yaml(finput):
     return _validate(finput, fschema_driver)
 
 
-def tech_yaml(instance: dict, foutput: str) -> None:
+def tech_yaml(instance: dict, foutput: str) -> str:
     _validate(instance, fschema_tech, defaults=False)
     # Ensure the file output has a .yaml suffix
     if not foutput.endswith(".yaml"):

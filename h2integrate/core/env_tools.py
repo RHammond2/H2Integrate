@@ -1,8 +1,15 @@
 import os
 import warnings
+from typing import cast
 from pathlib import Path
 
+from typing_extensions import ParamSpec
+
 from h2integrate import ROOT_DIR
+
+
+# TODO: deprecate with 3.11
+P = ParamSpec("P")
 
 
 def _check_duplicate_environment_vars(
@@ -40,7 +47,7 @@ def _check_duplicate_environment_vars(
     return mismatched_args
 
 
-def set_env_var(*, overwrite: bool = False, **kwargs: str):
+def set_env_var(*, overwrite: bool = False, **kwargs: P.kwargs):  # type: ignore[valid-type]
     """Set or overwrite environment variables.
 
     Args:
@@ -55,7 +62,7 @@ def set_env_var(*, overwrite: bool = False, **kwargs: str):
         os.environ[name] = value
 
 
-def load_env_vars_from_file(file_path: Path) -> dict:
+def load_env_vars_from_file(file_path: str | Path) -> dict[str, str]:
     """Load any dictionary-like key, value pairs from a configuration file (e.g. .env or .cdsapirc)
     that uses either a ``key=value`` or ``key:value`` format for storing data.
 
@@ -69,7 +76,7 @@ def load_env_vars_from_file(file_path: Path) -> dict:
 
     if isinstance(file_path, str):
         file_path = Path(file_path).resolve()
-    env_vars = {}
+    env_vars: dict[str, str] = {}
     if not file_path.is_file():
         return env_vars
     with file_path.open("r") as f:
@@ -138,8 +145,9 @@ def get_environment_variables(
 
     # Step 2: Load environment variables from `file_path`
     if file_path is not None:
-        file_path = Path(file_path).resolve()
-        if file_path.is_file():
+        file_path = Path(file_path).resolve()  # type: ignore[assignment]
+        cast(Path, file_path)
+        if file_path.is_file():  # type: ignore[attr-defined]
             # Prioritize environment variables from specified `file_path`
             env_vars |= load_env_vars_from_file(file_path)
             # Remove extraneous environment variables that were loaded from the file
@@ -161,9 +169,9 @@ def get_environment_variables(
         file_name = ".env"
 
     for folder in default_folders:
-        if (file_path := (folder / file_name)).is_file():
+        if (file_path := (folder / file_name)).is_file():  # type: ignore[assignment]
             # Prioritize environment variables that have already been set
-            env_vars_from_file = load_env_vars_from_file(file_path)
+            env_vars_from_file = load_env_vars_from_file(file_path)  # type: ignore[arg-type]
             mismatched_vars = _check_duplicate_environment_vars(
                 *args, original_env_vars=env_vars, new_env_vars=env_vars_from_file
             )

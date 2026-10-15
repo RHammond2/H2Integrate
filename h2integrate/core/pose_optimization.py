@@ -524,7 +524,7 @@ class PoseOptimization:
 
         if "warmstart_file" in self.config["driver"]["optimization"]:
             # Directly read the pyoptsparse sqlite db file
-            from pyoptsparse import SqliteDict
+            from pyoptsparse import SqliteDict  # type: ignore[import-not-found]
 
             db = SqliteDict(self.config["driver"]["optimization"]["warmstart_file"])
 

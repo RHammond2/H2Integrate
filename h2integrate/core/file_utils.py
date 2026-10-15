@@ -1,6 +1,7 @@
 import re
 import csv
 import copy
+from typing import cast
 from pathlib import Path
 from functools import partial, update_wrapper
 
@@ -286,7 +287,7 @@ def write_yaml(
     # Write yaml with updated values
     yaml = ry.YAML()
     yaml.default_flow_style = None
-    yaml.width = float("inf")
+    yaml.width = int(1e100)
     yaml.indent(mapping=4, sequence=6, offset=3)
     yaml.allow_unicode = False
     with Path(foutput).open("w", encoding="utf-8") as f:
@@ -481,7 +482,9 @@ def check_file_format_for_csv_generator(
     return new_fpath
 
 
-def check_data_dir(data_type: str, data_dir: str | None = None, data_subdir: str | None = None):
+def check_data_dir(
+    data_type: str, data_dir: str | Path | None = None, data_subdir: str | None = None
+) -> Path:
     """Checks for a folder to contain data files (e.g. resource data files), or creates
     one if necessary. If :py:attr:`data_dir` is input, the logic is as follows:
 
@@ -525,11 +528,13 @@ def check_data_dir(data_type: str, data_dir: str | None = None, data_subdir: str
 
     # check for user-provided resource data_dir
     if data_dir is not None:
-        if not Path(data_dir).is_dir():
-            Path.mkdir(data_dir, exist_ok=True, parents=True)
+        data_dir = Path(data_dir)
+        cast(Path, data_dir)
+        if not data_dir.is_dir():
+            data_dir.mkdir(exist_ok=True, parents=True)
         if data_subdir is None:
-            return Path(data_dir).absolute()
-        full_dir = Path(data_dir) / data_subdir
+            return data_dir.absolute()
+        full_dir = data_dir / data_subdir
         full_dir = check_data_dir(data_type=data_type, data_dir=full_dir)
         return full_dir.absolute()
 
@@ -537,7 +542,8 @@ def check_data_dir(data_type: str, data_dir: str | None = None, data_subdir: str
     data_env_vars = get_environment_variables(f"{data_type.upper()}_DIR")
     data_dir = data_env_vars.get(f"{data_type.upper()}_DIR")
     if data_dir is not None:
-        if not Path(data_dir).is_dir():
+        data_dir = Path(data_dir)
+        if not data_dir.is_dir():
             Path.mkdir(data_dir, parents=True, exist_ok=True)
         if data_subdir is None:
             return Path(data_dir).absolute()

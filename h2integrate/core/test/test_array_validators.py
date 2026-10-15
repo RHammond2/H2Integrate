@@ -20,24 +20,24 @@ NDArrayStr = npt.NDArray[np.str_]
 
 @define
 class ConverterConfig:
-    int_arr: npt.ArrayLike = field(converter=to_array(int, (-1, 1)))
-    float_arr: npt.ArrayLike = field(converter=to_array(float, (1, -1)))
-    neg_int_arr: npt.ArrayLike = field(converter=to_array(int))
-    neg_float_arr: npt.ArrayLike = field(converter=to_array(float))
+    int_arr: npt.ArrayLike = field(converter=to_array(int, (-1, 1)))  # type: ignore[misc]
+    float_arr: npt.ArrayLike = field(converter=to_array(float, (1, -1)))  # type: ignore[misc]
+    neg_int_arr: npt.ArrayLike = field(converter=to_array(int))  # type: ignore[misc]
+    neg_float_arr: npt.ArrayLike = field(converter=to_array(float))  # type: ignore[misc]
 
 
 @define
 class ValidatorConfig:
-    int_arr: npt.ArrayLike = field(converter=to_array(int, (-1, 1)), validator=array_ge(0))
-    float_arr: npt.ArrayLike = field(converter=to_array(float, (1, -1)), validator=array_gt(0))
-    neg_int_arr: npt.ArrayLike = field(converter=to_array(int), validator=array_lt(0))
-    neg_float_arr: npt.ArrayLike = field(converter=to_array(float), validator=array_le(0))
+    int_arr: npt.ArrayLike = field(converter=to_array(int, (-1, 1)), validator=array_ge(0))  # type: ignore[misc]
+    float_arr: npt.ArrayLike = field(converter=to_array(float, (1, -1)), validator=array_gt(0))  # type: ignore[misc]
+    neg_int_arr: npt.ArrayLike = field(converter=to_array(int), validator=array_lt(0))  # type: ignore[misc]
+    neg_float_arr: npt.ArrayLike = field(converter=to_array(float), validator=array_le(0))  # type: ignore[misc]
 
 
 @define
 class ShapeValidatorConfig:
-    field1: npt.ArrayLike = field(converter=to_array(int))
-    field2: npt.ArrayLike = field(converter=to_array(int), validator=match_shape("field1"))
+    field1: npt.ArrayLike = field(converter=to_array(int))  # type: ignore[misc]
+    field2: npt.ArrayLike = field(converter=to_array(int), validator=match_shape("field1"))  # type: ignore[misc]
 
 
 @pytest.mark.unit

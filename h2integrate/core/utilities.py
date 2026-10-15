@@ -1,4 +1,4 @@
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 import attrs
 import numpy as np
@@ -79,11 +79,12 @@ class BaseConfig:
         """
         if isinstance(data, cls):
             return data
+        cast(dict, data)
 
         # Check for any inputs that aren't part of the class definition
         if strict is True:
             class_attr_names = [a.name for a in cls.__attrs_attrs__]
-            extra_args = [d for d in data if d not in class_attr_names]
+            extra_args = [d for d in data if d not in class_attr_names]  # type: ignore[union-attr]
             if len(extra_args):
                 if additional_cls_name is not None:
                     msg = (
@@ -97,7 +98,7 @@ class BaseConfig:
                     )
                 raise AttributeError(msg)
 
-        kwargs = {a.name: data[a.name] for a in cls.__attrs_attrs__ if a.name in data and a.init}
+        kwargs = {a.name: data[a.name] for a in cls.__attrs_attrs__ if a.name in data and a.init}  # type: ignore
 
         # Map the inputs must be provided: 1) must be initialized, 2) no default value defined
         required_inputs = [

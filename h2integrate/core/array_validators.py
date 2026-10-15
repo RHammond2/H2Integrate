@@ -1,8 +1,10 @@
+from collections.abc import Callable
+
 import numpy as np
 from numpy.typing import ArrayLike, DTypeLike
 
 
-def to_array(dtype: DTypeLike, shape: tuple[int, ...] | None = None):
+def to_array(dtype: DTypeLike, shape: tuple[int, ...] | None = None) -> Callable:
     """Converts an array-like object to a NumPy ``NDArray`` with type :py:attr:`dtype` and shape
     :py:attr:`shape`.
 
@@ -13,7 +15,7 @@ def to_array(dtype: DTypeLike, shape: tuple[int, ...] | None = None):
             array. Defaults to ``None``.
     """
 
-    def convert(val: int | float | ArrayLike):
+    def convert(val: int | float | ArrayLike) -> np.ndarray:
         arr = np.array(val).astype(dtype)
         if shape is not None:
             return arr.reshape(shape)

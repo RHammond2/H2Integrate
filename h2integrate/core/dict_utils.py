@@ -244,7 +244,7 @@ def separate_shared_parameters(section_params: dict[str, dict]) -> tuple[dict, d
     if not section_params:
         return {}, {}
 
-    param_counts = Counter()
+    param_counts: dict = Counter()
     for params in section_params.values():
         for param_key in params:
             param_counts[param_key] += 1
