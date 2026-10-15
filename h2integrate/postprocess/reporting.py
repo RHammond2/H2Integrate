@@ -9,7 +9,7 @@ from rich.console import Console
 
 
 try:
-    from pyxdsm.XDSM import FUNC, XDSM
+    from pyxdsm.XDSM import FUNC, XDSM  # type: ignore[import-not-found]
 except ImportError:
     XDSM = None
     FUNC = None

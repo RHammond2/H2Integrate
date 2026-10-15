@@ -146,7 +146,7 @@ class PyomoStorageControllerBaseClass(om.ExplicitComponent):
             performance_model_kwargs,
             inputs,
             pyomo_model=self.pyomo_model,
-            commodity_name: str = self.config.commodity,
+            commodity_name: str = self.config.commodity,  # type: ignore[attr-defined]
         ):
             """
             Execute rolling-window dispatch for the controlled technology.
@@ -191,8 +191,8 @@ class PyomoStorageControllerBaseClass(om.ExplicitComponent):
             """
 
             # initialize outputs
-            storage_commodity_out = np.zeros(self.n_timesteps)
-            soc = np.zeros(self.n_timesteps)
+            storage_commodity_out = np.zeros(self.n_timesteps)  # type: ignore[attr-defined]
+            soc = np.zeros(self.n_timesteps)  # type: ignore[attr-defined]
 
             # This is where the pyomo controller interface is defined in individual
             #   pyomo controllers
@@ -228,7 +228,7 @@ class PyomoStorageControllerBaseClass(om.ExplicitComponent):
 
     @property
     def blocks(self) -> pyomo.Block:
-        return getattr(self.pyomo_model, self.config.tech_name)
+        return getattr(self.pyomo_model, self.config.tech_name)  # type: ignore[attr-defined]
 
 
 class SolverOptions:
