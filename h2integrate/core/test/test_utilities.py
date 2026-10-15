@@ -555,7 +555,7 @@ class BaseDemoModelStrictAdditional:
         )
 
 
-class BaseDemoModelAdditional:
+class BaseDemoModelAdditional(BaseDemoModel):
     """Demo base model for testing."""
 
     def __init__(self, config: dict):
