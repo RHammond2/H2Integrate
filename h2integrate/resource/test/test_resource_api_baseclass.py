@@ -98,7 +98,7 @@ class FakeResource(ResourceBaseAPIModel):
 
 
 class FakeTMYResource(FakeResource):
-    config_class = FakeTMYResourceConfig
+    config_class = FakeTMYResourceConfig  # type: ignore[assignment]
 
     def setup(self):
         self.requested_resource_years = []

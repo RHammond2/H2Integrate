@@ -88,7 +88,7 @@ class MeteosatPrimeMeridianTMYSolarAPIConfig(ResourceBaseAPIConfig):
     """
 
     resource_year: str = field(
-        converter=str.lower,
+        converter=str.lower,  # type: ignore[misc]
         validator=validators.in_(
             [
                 "tmy-2014",
