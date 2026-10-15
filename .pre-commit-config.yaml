@@ -45,7 +45,6 @@ repos:
         exclude: (^docs/|^test/)
         additional_dependencies:
           - pandas-stubs
-          - types-attrs
           - types-geopandas
           - types-jsonschema
           - types-networkx
