@@ -37,3 +37,15 @@ repos:
       - id: ruff
         types_or: [python, pyi, jupyter]
         args: [--fix, --unsafe-fixes]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v2.4.0
+    hooks:
+      - id: mypy
+        entry: mypy --install-types --non-interactive --config-file .mypy.ini
+        exclude: (^docs/|^test/)
+        additional_dependencies:
+          - pandas-stubs
+          - types-attrs
+          - types-geopandas
+          - types-jsonschema
+          - types-networkx
