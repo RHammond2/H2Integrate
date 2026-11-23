@@ -1,9 +1,11 @@
 import warnings
+from copy import deepcopy
 
 import numpy as np
 import PySAM.Pvwattsv8 as Pvwatts
 from attrs import field, define, validators
 
+from h2integrate.reliability import PerformanceReliability
 from h2integrate.core.utilities import BaseConfig, merge_shared_inputs
 from h2integrate.converters.tools import check_pysam_input_params, check_pysam_lifetime_options
 from h2integrate.core.supported_models import register
@@ -257,6 +259,29 @@ class PYSAMSolarPlantPerformanceModel(SolarPerformanceBaseClass):
                 desc="Solar panel azimuth angle in degrees",
             )
 
+        self.lifetime_output = bool(
+            self.design_dict.get("Lifetime", {}).get("system_use_lifetime_output", 0)
+        )
+        self.reliability_model = None
+        if use_reliability := "reliability" in self.options["tech_config"]["model_inputs"]:
+            plant_simulation_config = self.options["plant_config"]["plant"]["simulation"]
+            n_timesteps = plant_simulation_config.get("n_timesteps", 8760)
+            if self.lifetime_output:
+                n_timesteps *= self.plant_life
+            simulation_config = {
+                "simulation": {
+                    "dt": plant_simulation_config.get("dt", 3600),
+                    "n_timesteps": n_timesteps,
+                },
+            }
+            config = self.options["tech_config"]["model_inputs"]["reliability"]
+            use_reliability = config.get("use_reliability", use_reliability)
+            self._reliability_config = deepcopy(config | simulation_config)
+            self.reliability_model = PerformanceReliability.from_dict(
+                deepcopy(self._reliability_config)
+            )
+        self.use_reliability = use_reliability
+
     def get_initial_angle_value(self, angle_name: str, system_model):
         """Get the initial value to use for 'angle_name', based on either:
 
@@ -453,18 +478,25 @@ class PYSAMSolarPlantPerformanceModel(SolarPerformanceBaseClass):
         outputs["system_capacity_AC"] = pv_capacity_kWdc / dc_ac_ratio
         outputs["rated_electricity_production"] = outputs["system_capacity_AC"]
 
-        if bool(self.design_dict.get("Lifetime", {}).get("system_use_lifetime_output", 0)):
-            # using lifetime results
+        availability = np.ones(self.n_timesteps * max(1, self.lifetime_output * self.plant_life))
+        if self.use_reliability:
+            self.reliability_model = PerformanceReliability.from_dict(self._reliability_config)
+            self.reliability_model.run()
+            availability = self.reliability_model.availability
+        self.availability = availability
+        generation = np.array(self.system_model.Outputs.gen) * self.availability
+        if self.lifetime_output:
             # split the generation profile to have results per-year
-            generation_per_year = np.split(np.array(self.system_model.Outputs.gen), self.plant_life)
+            generation_per_year = np.split(generation, self.plant_life)
+
             # sum the generation per-year
             aep_per_year = np.array(generation_per_year).sum(axis=1)
             # get the number of timesteps per year (should be the same for all years)
             n_timesteps_per_year = np.array([len(k) for k in generation_per_year])
             # output the first n_timesteps of the generation profile
-            outputs["electricity_out"][simulation_range] = np.array(self.system_model.Outputs.gen)[
-                : self.n_timesteps
-            ][simulation_range.start : simulation_range.stop]
+            outputs["electricity_out"][simulation_range] = generation[: self.n_timesteps][
+                simulation_range.start : simulation_range.stop
+            ]
             # make production is the max production per-year
             max_production = (
                 outputs["rated_electricity_production"] * n_timesteps_per_year * (self.dt / 3600)
@@ -477,7 +509,7 @@ class PYSAMSolarPlantPerformanceModel(SolarPerformanceBaseClass):
 
         else:
             # not using lifetime output, use results as-is
-            outputs["electricity_out"][simulation_range] = self.system_model.Outputs.gen[
+            outputs["electricity_out"][simulation_range] = generation[
                 simulation_range.start : simulation_range.stop
             ]  # kW-AC
             max_production = (
