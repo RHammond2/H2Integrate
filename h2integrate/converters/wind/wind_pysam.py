@@ -1,5 +1,6 @@
 import operator
 import functools
+from copy import deepcopy
 from typing import Any
 
 import numpy as np
@@ -7,6 +8,7 @@ import PySAM.Windpower as Windpower
 import matplotlib.pyplot as plt
 from attrs import field, define, validators
 
+from h2integrate.reliability import PerformanceReliability
 from h2integrate.core.utilities import BaseConfig, merge_shared_inputs
 from h2integrate.converters.tools import (
     check_pysam_lifetime_options,
@@ -291,6 +293,29 @@ class PYSAMWindPlantPerformanceModel(WindPerformanceBaseClass):
             "wind_direction": 4,
         }
 
+        self.reliability_model = None
+        self.use_lifetime_output = bool(
+            self.design_dict.get("Lifetime", {}).get("system_use_lifetime_output", 0)
+        )
+        if use_reliability := "reliability" in self.options["tech_config"]["model_inputs"]:
+            plant_simulation_config = self.options["plant_config"]["plant"]["simulation"]
+            n_timesteps = plant_simulation_config.get("n_timesteps", 8760)
+            if self.use_lifetime_output:
+                n_timesteps *= self.plant_life
+            simulation_config = {
+                "simulation": {
+                    "dt": plant_simulation_config.get("dt", 3600),
+                    "n_timesteps": n_timesteps,
+                },
+            }
+            config = self.options["tech_config"]["model_inputs"]["reliability"]
+            use_reliability = config.get("use_reliability", use_reliability)
+            self._reliability_config = deepcopy(config | simulation_config)
+            self.reliability_model = PerformanceReliability.from_dict(
+                deepcopy(self._reliability_config)
+            )
+        self.use_reliability = use_reliability
+
     def format_resource_data(self, hub_height, wind_resource_data):
         """Format wind resource data into the format required for the
         PySAM Windpower module. The data is formatted as:
@@ -539,12 +564,21 @@ class PYSAMWindPlantPerformanceModel(WindPerformanceBaseClass):
         generation = np.asarray(system_model.Outputs.gen)
         time_step_hours = self.dt / 3600
 
-        use_lifetime_output = bool(
-            self.design_dict.get("Lifetime", {}).get("system_use_lifetime_output", 0)
-        )
         native_lifetime_output = hasattr(system_model, "Lifetime")
 
-        if use_lifetime_output:
+        availability = np.ones((self.config.num_turbines, len(self.n_timesteps)))
+        if self.use_reliability:
+            self.reliability_model = PerformanceReliability.from_dict(
+                deepcopy(self._reliability_config)
+            )
+            for i in range(self.config.num_turbines):
+                self.reliability_model.run()
+                availability[i, :] = self.reliability_model.availability
+        self.availability = availability
+        self.total_availability = availability.sum(axis=0) / self.config.num_turbines
+        generation *= self.total_availability
+
+        if self.use_lifetime_output:
             if not native_lifetime_output:
                 degradation = self.design_dict["Lifetime"]["ac_degradation"]
                 generation = apply_non_native_lifetime_degradation(
@@ -572,7 +606,7 @@ class PYSAMWindPlantPerformanceModel(WindPerformanceBaseClass):
             )
 
         outputs["total_electricity_produced"] = outputs["electricity_out"].sum() * time_step_hours
-        if not use_lifetime_output:
+        if not self.use_lifetime_output:
             outputs["capacity_factor"] = outputs["total_electricity_produced"] / max_production
 
         # Apply curtailment based on set_point
