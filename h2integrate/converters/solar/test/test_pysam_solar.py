@@ -1,3 +1,4 @@
+import itertools
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -682,3 +683,133 @@ def test_pvwatts_with_lifetime_performance(
         assert all(v < 0 for v in np.diff(aep))
     with subtests.test("CF is always decreasing"):
         assert all(v < 0 for v in np.diff(cf))
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("use_reliability,use_lifetime", itertools.product([True, False], repeat=2))
+def test_pvwatts_reliability(
+    basic_pysam_options, solar_resource_dict, plant_config, use_reliability, use_lifetime, subtests
+):
+    """Test `PYSAMSolarPlantPerformanceModel` with a basic input scenario:
+
+    - `pysam_options` is provided
+    - `create_model_from` is set to 'default'
+    - `config_name` is 'PVWattsSingleOwner', this is used to create the starting system model
+        because `create_model_from` is default.
+    - `tilt_angle_setting` is "input" and tilt is provided (in two separate places) as zero.
+    """
+
+    basic_pysam_options["SystemDesign"].update({"tilt": 0.0})
+    basic_pysam_options["Lifetime"] = {
+        "system_use_lifetime_output": int(use_lifetime),
+        "analysis_period": 30,
+        "dc_degradation": np.cumsum(np.full(30, 0.025)).tolist(),
+    }
+    pv_design_dict = {
+        "pv_capacity_kWdc": 250000.0,
+        "dc_ac_ratio": 1.23,
+        "create_model_from": "default",
+        "config_name": "PVWattsSingleOwner",
+        "tilt": 0.0,
+        "tilt_angle_setting": "input",  # "lat-func",
+        "pysam_options": basic_pysam_options,
+    }
+
+    tech_config_dict = {
+        "model_inputs": {
+            "performance_parameters": pv_design_dict,
+            "reliability": {
+                "use_reliability": use_reliability,
+                "availability_type": "fractional",
+                "failure_model": "WeibullReliability",
+                "maintenance_model": "FixedIntervalReliability",
+                "failure_parameters": {
+                    "scale": 0.5,
+                    "shape": 1,
+                    "n_components": 3,
+                    "downtime": {
+                        "model": "FixedDowntime",
+                        "hours": 5,
+                        "n_components": 3,
+                    },
+                },
+                "maintenance_parameters": {
+                    "frequency": [0.25, 1, 4],
+                    "downtime": {
+                        "model": "UniformDowntime",
+                        "min_hours": 2,
+                        "max_hours": 5,
+                        "n_components": 3,
+                    },
+                },
+            },
+        }
+    }
+
+    prob = om.Problem()
+    solar_resource = GOESAggregatedSolarAPI(
+        plant_config=plant_config,
+        resource_config=solar_resource_dict,
+        driver_config={},
+    )
+    comp = PYSAMSolarPlantPerformanceModel(
+        plant_config=plant_config,
+        tech_config=tech_config_dict,
+        driver_config={},
+    )
+    prob.model.add_subsystem("solar_resource", solar_resource, promotes=["*"])
+    prob.model.add_subsystem("pv_perf", comp, promotes=["*"])
+    prob.setup()
+    prob.run_model()
+
+    n_timesteps = plant_config["plant"]["simulation"]["n_timesteps"]
+    plant_life = plant_config["plant"]["plant_life"]
+
+    solar_model = prob.model.pv_perf
+    aep = prob.get_val("pv_perf.annual_electricity_produced", units="kW*h/year")
+    non_lifetime_floor_aep = 527345996  # captured from non lifetime test with comparable settings
+    lifetime_floor_aep = np.array(  # captured from lifetime test
+        [
+            527216534,
+            527087033,
+            526957475,
+            526827864,
+            526698243,
+            526568610,
+            526438841,
+            526308996,
+            526179119,
+            526049189,
+            525919210,
+            525789231,
+            525659244,
+            525529209,
+            525399128,
+            525268973,
+            525138789,
+            525008588,
+            524878353,
+            524748118,
+            524617866,
+            524487579,
+            524357293,
+            524227006,
+            524096720,
+            523966427,
+            523836089,
+            523705751,
+            523575300,
+            523444808,
+        ]
+    )
+
+    expected_length = n_timesteps * plant_life if use_lifetime else n_timesteps
+    assert solar_model.availability.shape == (expected_length,)
+    if use_reliability:
+        assert solar_model.availability.sum() < expected_length
+
+    if use_reliability:
+        if use_lifetime:
+            assert np.all(aep < lifetime_floor_aep)
+        else:
+            assert np.all(aep < non_lifetime_floor_aep)
