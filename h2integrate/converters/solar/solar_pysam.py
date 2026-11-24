@@ -480,6 +480,7 @@ class PYSAMSolarPlantPerformanceModel(SolarPerformanceBaseClass):
 
         availability = np.ones(self.n_timesteps * max(1, self.lifetime_output * self.plant_life))
         if self.use_reliability:
+            # TODO: account for # arrays/panels -- need to determine how that's calculated
             self.reliability_model = PerformanceReliability.from_dict(self._reliability_config)
             self.reliability_model.run()
             availability = self.reliability_model.availability
