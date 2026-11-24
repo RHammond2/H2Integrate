@@ -1,3 +1,5 @@
+import itertools
+
 import numpy as np
 import pytest
 import openmdao.api as om
@@ -509,3 +511,96 @@ def test_wind_plant_pysam_change_turbine_design(plant_config_wtk, wind_plant_con
             )
             == 651355.1859674307
         )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "use_reliability,use_lifetime_output", itertools.product([True, False], repeat=2)
+)
+def test_wind_plant_pysam_reliability(
+    plant_config_wtk, wind_plant_config, use_reliability, use_lifetime_output, subtests
+):
+    prob = om.Problem()
+
+    wind_resource = WTKNLRDeveloperAPIWindResource(
+        plant_config=plant_config_wtk,
+        resource_config=plant_config_wtk["site"]["resource"]["wind_resource"][
+            "resource_parameters"
+        ],
+        driver_config={},
+    )
+
+    wind_plant_config["pysam_options"]["Lifetime"] = {
+        "system_use_lifetime_output": int(use_lifetime_output)
+    }
+    tech_config = {
+        "model_inputs": {
+            "performance_parameters": wind_plant_config,
+            "reliability": {
+                "use_reliability": use_reliability,
+                "availability_type": "fractional",
+                "failure_model": "WeibullReliability",
+                "maintenance_model": "FixedIntervalReliability",
+                "failure_parameters": {
+                    "scale": 0.5,
+                    "shape": 1,
+                    "n_components": 3,
+                    "downtime": {
+                        "model": "FixedDowntime",
+                        "hours": 5,
+                        "n_components": 3,
+                    },
+                },
+                "maintenance_parameters": {
+                    "frequency": [0.25, 1, 4],
+                    "downtime": {
+                        "model": "UniformDowntime",
+                        "min_hours": 2,
+                        "max_hours": 5,
+                        "n_components": 3,
+                    },
+                },
+            },
+        }
+    }
+
+    wind_plant = PYSAMWindPlantPerformanceModel(
+        plant_config=plant_config_wtk,
+        tech_config=tech_config,
+        driver_config={},
+    )
+
+    prob.model.add_subsystem("wind_resource", wind_resource, promotes=["*"])
+    prob.model.add_subsystem("wind_plant", wind_plant, promotes=["*"])
+    prob.setup()
+    prob.run_model()
+
+    n_turbines = wind_plant_config["num_turbines"]
+    n_timesteps = plant_config_wtk["plant"]["simulation"]["n_timesteps"]
+    n_years = plant_config_wtk["plant"]["plant_life"]
+    wind_model = prob.model.wind_plant
+    availability = wind_model.availability
+    total_availability = wind_model.total_availability
+    total_timesteps = n_timesteps * max(1, n_years * use_lifetime_output)
+
+    assert availability.shape == (n_turbines, total_timesteps)
+    assert total_availability.shape == (total_timesteps,)
+    if use_reliability:
+        np.all(
+            not np.array_equal(availability[i:], availability[j:])
+            for i, j in itertools.combinations(range(n_turbines), r=2)
+        )
+        assert np.all(availability.sum(axis=1) > 0)
+        assert np.all(availability.sum(axis=1) < total_timesteps)
+    else:
+        assert np.all(availability == 1)
+
+    expected_aep_no_reliability = 1014129.048439629
+    aep = prob.get_val("wind_plant.annual_electricity_produced", units="MW*h/year")[0]
+    total_production = np.sum(prob.get_val("wind_plant.electricity_out", units="MW"))
+    assert abs((aep - total_production) / aep) < 0.01
+
+    if use_reliability:
+        assert aep < expected_aep_no_reliability
+    else:
+        assert pytest.approx(aep) == expected_aep_no_reliability

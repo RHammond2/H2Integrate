@@ -566,7 +566,7 @@ class PYSAMWindPlantPerformanceModel(WindPerformanceBaseClass):
 
         native_lifetime_output = hasattr(system_model, "Lifetime")
 
-        availability = np.ones((self.config.num_turbines, len(self.n_timesteps)))
+        availability = np.ones((n_turbs, self.reliability_model.simulation.n_timesteps))
         if self.use_reliability:
             self.reliability_model = PerformanceReliability.from_dict(
                 deepcopy(self._reliability_config)
@@ -576,7 +576,6 @@ class PYSAMWindPlantPerformanceModel(WindPerformanceBaseClass):
                 availability[i, :] = self.reliability_model.availability
         self.availability = availability
         self.total_availability = availability.sum(axis=0) / self.config.num_turbines
-        generation *= self.total_availability
 
         if self.use_lifetime_output:
             if not native_lifetime_output:
@@ -584,6 +583,7 @@ class PYSAMWindPlantPerformanceModel(WindPerformanceBaseClass):
                 generation = apply_non_native_lifetime_degradation(
                     generation, degradation, self.plant_life
                 )
+                generation *= self.total_availability
 
             generation_per_year = np.split(generation, self.plant_life)
             annual_energy = np.array(
@@ -599,8 +599,14 @@ class PYSAMWindPlantPerformanceModel(WindPerformanceBaseClass):
             outputs["annual_electricity_produced"] = annual_energy
             outputs["capacity_factor"] = annual_energy / max_production
         else:
+            annual_availability = (
+                self.reliability_model.availability.sum() / self.reliability_model.availability.size
+            )
+            generation *= self.total_availability
             outputs["electricity_out"] = generation
-            outputs["annual_electricity_produced"] = system_model.Outputs.annual_energy
+            outputs["annual_electricity_produced"] = (
+                system_model.Outputs.annual_energy * annual_availability
+            )
             max_production = (
                 self.n_timesteps * outputs["rated_electricity_production"] * time_step_hours
             )
