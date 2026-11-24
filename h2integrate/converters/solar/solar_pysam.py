@@ -259,14 +259,14 @@ class PYSAMSolarPlantPerformanceModel(SolarPerformanceBaseClass):
                 desc="Solar panel azimuth angle in degrees",
             )
 
-        self.lifetime_output = bool(
+        self.use_lifetime_output = bool(
             self.design_dict.get("Lifetime", {}).get("system_use_lifetime_output", 0)
         )
         self.reliability_model = None
         if use_reliability := "reliability" in self.options["tech_config"]["model_inputs"]:
             plant_simulation_config = self.options["plant_config"]["plant"]["simulation"]
             n_timesteps = plant_simulation_config.get("n_timesteps", 8760)
-            if self.lifetime_output:
+            if self.use_lifetime_output:
                 n_timesteps *= self.plant_life
             simulation_config = {
                 "simulation": {
@@ -478,7 +478,9 @@ class PYSAMSolarPlantPerformanceModel(SolarPerformanceBaseClass):
         outputs["system_capacity_AC"] = pv_capacity_kWdc / dc_ac_ratio
         outputs["rated_electricity_production"] = outputs["system_capacity_AC"]
 
-        availability = np.ones(self.n_timesteps * max(1, self.lifetime_output * self.plant_life))
+        availability = np.ones(
+            self.n_timesteps * max(1, self.use_lifetime_output * self.plant_life)
+        )
         if self.use_reliability:
             # TODO: account for # arrays/panels -- need to determine how that's calculated
             self.reliability_model = PerformanceReliability.from_dict(self._reliability_config)
@@ -486,7 +488,7 @@ class PYSAMSolarPlantPerformanceModel(SolarPerformanceBaseClass):
             availability = self.reliability_model.availability
         self.availability = availability
         generation = np.array(self.system_model.Outputs.gen) * self.availability
-        if self.lifetime_output:
+        if self.use_lifetime_output:
             # split the generation profile to have results per-year
             generation_per_year = np.split(generation, self.plant_life)
 
