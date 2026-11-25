@@ -586,7 +586,7 @@ def test_wind_plant_pysam_reliability(
     assert availability.shape == (n_turbines, total_timesteps)
     assert total_availability.shape == (total_timesteps,)
     if use_reliability:
-        np.all(
+        assert np.all(
             not np.array_equal(availability[i:], availability[j:])
             for i, j in itertools.combinations(range(n_turbines), r=2)
         )
